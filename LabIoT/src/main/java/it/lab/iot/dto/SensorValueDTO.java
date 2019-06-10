@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 public class SensorValueDTO {
 	private String sensorId;
+	private Integer deviceId;
 	private String sensorName;
 	private Float value;
 	private Boolean isAlert;

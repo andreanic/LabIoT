@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.lab.iot.dto.ApiBaseResponse;
+import it.lab.iot.dto.SensorDTO;
+import it.lab.iot.dto.SensorDevicesDTO;
 import it.lab.iot.dto.SensorValueDTO;
 import it.lab.iot.exception.AppException;
 import it.lab.iot.exception.BaseException;
@@ -45,8 +47,24 @@ public class SensorController extends ExceptionHandlerController{
 	public ResponseEntity<ApiBaseResponse> getLastValues(HttpServletRequest request) throws AppException {
 		try {
 			logger.info(request.getRequestURI());
-			List<SensorValueDTO> values = sensorService.getValues();
-			ApiBaseResponse<List<SensorValueDTO>> abp = new ApiBaseResponse<List<SensorValueDTO>>(request.getRequestURI(),values);
+			List<SensorValueDTO> dto = sensorService.getValues();
+			ApiBaseResponse<List<SensorValueDTO>> abp = new ApiBaseResponse<List<SensorValueDTO>>(request.getRequestURI(),dto);
+	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
+		} catch (BaseException e) {
+			throw new AppException(e);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@GET
+	@RequestMapping("/all")
+	@ResponseBody
+    @Produces(MediaType.APPLICATION_JSON)
+	public ResponseEntity<ApiBaseResponse> getAllSensorsAvailable(HttpServletRequest request) throws AppException {
+		try {
+			logger.info(request.getRequestURI());
+			List<SensorDTO> dto = sensorService.getAllSensorsAvailable();
+			ApiBaseResponse<List<SensorDTO>> abp = new ApiBaseResponse<List<SensorDTO>>(request.getRequestURI(),dto);
 	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
 		} catch (BaseException e) {
 			throw new AppException(e);
@@ -61,8 +79,41 @@ public class SensorController extends ExceptionHandlerController{
 	public ResponseEntity<ApiBaseResponse> getLast20ValuesBySensorId(HttpServletRequest request, @PathVariable("sensorId") String sensorId) throws AppException {
 		try {
 			logger.info(request.getRequestURI());
-			List<SensorValueDTO> values = sensorService.getLast20ValuesBySensorId(sensorId);
-			ApiBaseResponse<List<SensorValueDTO>> abp = new ApiBaseResponse<List<SensorValueDTO>>(request.getRequestURI(),values);
+			List<SensorValueDTO> dto = sensorService.getLast20ValuesBySensorId(sensorId);
+			ApiBaseResponse<List<SensorValueDTO>> abp = new ApiBaseResponse<List<SensorValueDTO>>(request.getRequestURI(),dto);
+	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
+		} catch (BaseException e) {
+			throw new AppException(e);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@GET
+	@RequestMapping("/{sensorId}/{deviceId}/values")
+	@ResponseBody
+    @Produces(MediaType.APPLICATION_JSON)
+	public ResponseEntity<ApiBaseResponse> getLast20ValuesBySensorIdAndDeviceId(HttpServletRequest request, @PathVariable("sensorId") String sensorId, 
+			@PathVariable("deviceId") Integer deviceId) throws AppException {
+		try {
+			logger.info(request.getRequestURI());
+			List<SensorValueDTO> dto = sensorService.getLast20ValuesBySensorIdAndDeviceId(sensorId, deviceId);
+			ApiBaseResponse<List<SensorValueDTO>> abp = new ApiBaseResponse<List<SensorValueDTO>>(request.getRequestURI(),dto);
+	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
+		} catch (BaseException e) {
+			throw new AppException(e);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@GET
+	@RequestMapping("/{sensorId}/devices")
+	@ResponseBody
+    @Produces(MediaType.APPLICATION_JSON)
+	public ResponseEntity<ApiBaseResponse> getSensorDevices(HttpServletRequest request, @PathVariable("sensorId") String sensorId) throws AppException {
+		try {
+			logger.info(request.getRequestURI());
+			SensorDevicesDTO dto = sensorService.getAllSensorDevices(sensorId);
+			ApiBaseResponse<SensorDevicesDTO> abp = new ApiBaseResponse<SensorDevicesDTO>(request.getRequestURI(),dto);
 	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
 		} catch (BaseException e) {
 			throw new AppException(e);

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
@@ -81,6 +82,22 @@ public class DeviceController extends ExceptionHandlerController{
 			DeviceDTO dto = deviceService.subscribe(subscriber);
 			ApiBaseResponse<DeviceDTO> abr = new ApiBaseResponse<DeviceDTO>(request.getRequestURI(),dto);
 	        return new ResponseEntity<ApiBaseResponse>(abr,HttpStatus.OK);
+		} catch (BaseException e) {
+			throw new AppException(e);
+		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@DELETE
+	@RequestMapping("{deviceId}/delete")
+	@ResponseBody
+    @Produces(MediaType.APPLICATION_JSON)
+	public ResponseEntity<ApiBaseResponse> deleteOldValue(HttpServletRequest request, @PathVariable("deviceId") Integer deviceId) throws AppException {
+		try {
+			logger.info(request.getRequestURI());
+			deviceService.deleteSubscribedDevice(deviceId);
+			ApiBaseResponse abp = new ApiBaseResponse(request.getRequestURI(),null);
+	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
 		} catch (BaseException e) {
 			throw new AppException(e);
 		}

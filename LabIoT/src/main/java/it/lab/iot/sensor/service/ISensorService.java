@@ -11,7 +11,8 @@ import it.lab.iot.exception.BaseException;
 
 public interface ISensorService {
 	public List<SensorValueDTO> getValues() throws BaseException;
-	public List<SensorValueDTO> getLast20ValuesBySensorId(String sensorName) throws BaseException;
+	public List<SensorValueDTO> getLast20ValuesBySensorId(String sensorId) throws BaseException;
+	public List<SensorValueDTO> getLast20ValuesBySensorIdAndDeviceId(String sensorId, Integer deviceId) throws BaseException;
 	public List<SensorDTO> getAllSensorsAvailable() throws BaseException;
 	public SensorDevicesDTO getAllSensorDevices(String sensorId) throws BaseException;
 	public void createValue(SensorValueDTO sensorValue) throws BaseException;

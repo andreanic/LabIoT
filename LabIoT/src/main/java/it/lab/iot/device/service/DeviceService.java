@@ -16,6 +16,7 @@ import it.lab.iot.device.mapper.DeviceDTOToDevice;
 import it.lab.iot.device.mapper.DeviceToDTO;
 import it.lab.iot.device.mapper.DeviceToDeviceSensorsDTO;
 import it.lab.iot.device.repository.IDeviceRepository;
+import it.lab.iot.device.repository.IDeviceSensorRepository;
 import it.lab.iot.dto.DeviceDTO;
 import it.lab.iot.dto.DeviceSensorsDTO;
 import it.lab.iot.dto.SensorDTO;
@@ -37,9 +38,8 @@ public class DeviceService implements IDeviceService {
 	private IDeviceRepository deviceRepository;
 	@Autowired
 	private ISensorRepository sensorRepository;
-	
 	@Autowired
-	private ISensorService sensorService;
+	private IDeviceSensorRepository deviceSensorRepository;
 	
 	@Override
 	public List<DeviceDTO> getAllDeviceAvailable() throws BaseException {		
@@ -73,13 +73,16 @@ public class DeviceService implements IDeviceService {
 		
 		Integer deviceId = null;
 		
-		if(deviceDTO.getDevice().getDeviceId() == null) {
+		//Aggiungo un nuovo device solamente se il device id è nullo o uguale a -1 (cioè non inizializzato)
+		if(deviceDTO.getDevice().getDeviceId() == null || new Integer(-1).equals(deviceDTO.getDevice().getDeviceId())) {
 			deviceId = this.addNewDevice(deviceDTO);
 		}
+		//Altrimenti refresho il device rendendolo visibile per altri N minuti
 		else {
 			Optional<Device> device = deviceRepository.findById(deviceDTO.getDevice().getDeviceId());
 			
 			if(device.isPresent()) {
+				//Salvo direttamente poichè al salvataggio si aggiorna la data con il current time
 				deviceRepository.save(device.get());
 				deviceId = device.get().getId();
 			}
@@ -100,8 +103,6 @@ public class DeviceService implements IDeviceService {
 		
 		device = deviceRepository.save(device);
 		
-		List<DeviceSensor> deviceSensors = new ArrayList<DeviceSensor>();
-		
 		for(SensorDTO sensorDTO : deviceDTO.getSensors()) {
 			if(sensorDTO.getSensorId() == null || sensorDTO.getSensorId().isEmpty()) throw new InvalidSensorIdException();
 			
@@ -114,19 +115,30 @@ public class DeviceService implements IDeviceService {
 				deviceSensor.setSensor(sensor.get());
 			}
 			else {
-				deviceSensor.setSensor(SensorDTOToSensor.map(sensorDTO));
+				Sensor sensorToAdd = SensorDTOToSensor.map(sensorDTO);
+				sensorToAdd = sensorRepository.save(sensorToAdd);
+				
+				deviceSensor.setSensor(sensorToAdd);
+				
 			}
 			
-			deviceSensors.add(deviceSensor);
+			deviceSensor = deviceSensorRepository.save(deviceSensor);
 		}
 		
-		if(!deviceSensors.isEmpty()) {
-			device.setDeviceSensors(deviceSensors);
-			
-			device = deviceRepository.save(device);
-		}
 		
 		return device.getId();
+	}
+
+	@Override
+	public void deleteSubscribedDevice(Integer deviceId) throws BaseException {
+		if(deviceId == null) throw new InvalidDeviceIdException();
+		
+		Optional<Device> device = deviceRepository.findById(deviceId);
+		
+		if(!device.isPresent()) throw new NoDeviceFoundException();
+		
+		deviceRepository.delete(device.get());
+		
 	}
 
 }

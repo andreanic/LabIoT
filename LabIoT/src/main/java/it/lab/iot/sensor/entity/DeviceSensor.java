@@ -15,7 +15,8 @@ public class DeviceSensor implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	private int id;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Integer id;
 
 	//bi-directional many-to-one association to Sensor
 	@ManyToOne
@@ -29,11 +30,11 @@ public class DeviceSensor implements Serializable {
 	public DeviceSensor() {
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return this.id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

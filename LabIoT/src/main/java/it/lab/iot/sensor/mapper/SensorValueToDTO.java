@@ -10,6 +10,7 @@ public class SensorValueToDTO {
 		dto.setDataInserimento(sensorValue.getDataCampione());
 		dto.setSensorName(sensorValue.getSensor().getSensorName());
 		dto.setSensorId(sensorValue.getSensor().getId());
+		dto.setDeviceId(sensorValue.getSubscriber().getId());
 		dto.setValue(sensorValue.getValore());
 		dto.setIsAlert(sensorValue.getIsAlert());
 		

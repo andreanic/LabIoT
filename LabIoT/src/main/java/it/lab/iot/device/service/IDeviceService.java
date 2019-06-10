@@ -10,4 +10,5 @@ public interface IDeviceService {
 	public List<DeviceDTO> getAllDeviceAvailable() throws BaseException;
 	public DeviceSensorsDTO getAllDeviceSensors(Integer deviceId) throws BaseException;
 	public DeviceDTO subscribe(DeviceSensorsDTO device) throws BaseException;
+	public void deleteSubscribedDevice(Integer deviceId) throws BaseException;
 }
