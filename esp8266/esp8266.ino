@@ -36,6 +36,8 @@ ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);*/
 
 
 
+//String webServerAddress="149.132.182.203:8080";
+String webServerAddress="149.132.182.121:3000";
 MQTTInterface *mqtt = new ESP8266MQTT(mqttserver,1883);
 Tilt_sensor *tilt = new Tilt_sensor(D2,1,50);
 Heartbeat_sensor *heartbeat= new Heartbeat_sensor(A0,144,3000);
@@ -49,35 +51,35 @@ Led_actuator *ledHelp = new Led_actuator(D8);
 Button_simple *button = new Button_simple(D3);
 Button_simple *buttonHelp = new Button_simple(D7);
 
-
-
+unsigned int boardId=0;
+WiFiClient client;
+HTTPClient http;
+    
 void setup() {
   Serial.begin(9600);
   while(!Serial){}
   mqtt->setCallback(callback);
   String allObjJson; 
-  createJsonObj(allObjJson);
-  //fa chiamata al web server che ritorna id
-  httpPost("localhost",3000,"testPost",allObjJson);
+  createJsonObj(allObjJson,boardId);
+  String request = "http://"+webServerAddress+"/testPost";
+  httpPost(request,allObjJson,boardId);
   Serial.println(allObjJson);
 }
 
 void loop() {
   if(ESP8266Wifi.isConnected() == false){
     ESP8266Wifi.connect();  
-    //serverweb.startServer();
   }
   if (!mqtt->isConnected()) {
       mqtt->reconnect();
       mqtt->subscribe("Help");
   }
-  //serverweb.listen();
   mqtt->loop();
   String allObjJson; 
-  createJsonObj(allObjJson);
-  //fa chiamata al web server che ritorna id
-  httpPost("localhost",3000,"testPost",allObjJson);
-  delay(2000);
+  createJsonObj(allObjJson,boardId);
+  String request = "http://"+webServerAddress+"/testPost";
+  httpPost(request,allObjJson,boardId);
+  delay(5000);
   /*if(button->isPressed()){
       led->activate(LOW);
       ledHelp->activate(LOW);
@@ -171,19 +173,35 @@ void loop() {
           Serial.println(valoretilt);
     }*/
 }
-//{device: {deviceName:esp8266,deviceId:null}} prendere i valori da telegram
-/*fa il json di tutti i sensori e li invia al server */
-void createJsonObj(String &allObjJson) {
+/*
+{
+ "device":{
+  "deviceName":"arduino MKR 1000",
+  "deviceId": 100000
+ },
+ "sensors":[{
+  "sensorId":"KSI - 85",
+  "sensorName":"Temperatura",
+  "descritpion":"Sensore per misurare la temperatura"
+ }]
+}
+*/
+void createJsonObj(String &allObjJson,unsigned int board) {
   StaticJsonDocument<1024> doc;
-  JsonArray array = doc.to<JsonArray>();
-  //aggiunere id:null
+  JsonObject root = doc.to<JsonObject>();
+  JsonObject device = root.createNestedObject("device");
+  device["deviceName"]="ESP8266";
+  if(board != 0){
+    device["deviceId"]=board;  
+  }
+  JsonArray sensors = root.createNestedArray("sensors");
   String heartJson = heartbeat->getJsonMetadata();
   String tiltJson = tilt->getJsonMetadata();
   String vibrationJson = vibration->getJsonMetadata();
-  array.add(heartJson);
-  array.add(tiltJson);
-  array.add(vibrationJson);
-  serializeJson(doc, allObjJson);
+  sensors.add(heartJson);
+  sensors.add(tiltJson);
+  sensors.add(vibrationJson);
+  serializeJson(root, allObjJson);
 }
 
 void callback(char* topic, byte* payload, unsigned int length){
@@ -196,17 +214,16 @@ void callback(char* topic, byte* payload, unsigned int length){
   Serial.println();
   led->activate(HIGH);
 }
-void httpPost(const String host, uint16_t port, String uri, const String &data){
-    WiFiClient client;
-    HTTPClient http;
-    if (http.begin(client,host,port,uri)) {  
+void httpPost(const String requestUrl, const String &data,unsigned int boardId){
+    Serial.println("Indirizzo " + requestUrl);
+    if (http.begin(client,requestUrl)) { 
+      http.addHeader("Content-Type", "application/json"); 
       int httpCode = http.POST(data);
       if (httpCode > 0) {
         Serial.printf("[HTTP] POST... code: %d\n", httpCode);
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          Serial.println(String(http.getSize()));
           String payload = http.getString();
-          Serial.println(payload);
+          Serial.println("payload " + payload);
         }
       } else {
         Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());

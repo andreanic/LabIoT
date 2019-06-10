@@ -11,28 +11,17 @@ class Heartbeat_sensor: public Sensor {
 };
 
 Heartbeat_sensor::Heartbeat_sensor(int pin,float soglia): Sensor(pin,soglia) {
-        sensorName="heartbeat";
-        description="sensore cherileva i battiti del cuore";
-        um = "";
-        typeValue="string";
-        digitOrAnal="float";
-        url="";
+        this->sensorId="";
+        this->sensorName="heartbeat";
+        this->description="sensore per misurare i battiti del cuore";
 }
 Heartbeat_sensor::Heartbeat_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
-        description="sensore cherileva i battiti del cuore";
-        um = "";
-        typeValue="string";
-        digitOrAnal="float";
-        url="";
+        this->sensorId="";
+        this->sensorName="heartbeat";
+        this->description="sensore per misurare i battiti del cuore";
 }
 
-Heartbeat_sensor::~Heartbeat_sensor(){
-        description="sensore cherileva i battiti del cuore";
-        um = "";
-        typeValue="string";
-        digitOrAnal="float";
-        url="";
-  }
+Heartbeat_sensor::~Heartbeat_sensor(){}
 
 float Heartbeat_sensor::campiona() {
   double alpha = 0.75;

@@ -8,12 +8,9 @@ class Sensor {
         float value;
         unsigned long ultimocampionamento;
         unsigned long frequenzacampionamento;
+        String sensorId;
         String sensorName;
         String description;
-        String um;
-        String typeValue;
-        String digitOrAnal;
-        String url;
     public: 
         unsigned int soglieSuccessive;
         int maxSoglieSuccessive;
@@ -136,18 +133,9 @@ void Sensor::setMaxSoglie(int n){
 }
 String Sensor::getJsonMetadata(){
   DynamicJsonDocument doc(1024);
+  doc["sensorId"]=this->sensorId;
   doc["sensorName"] = this->sensorName;
-  //doc["value"] = this->value;
-  doc["isAlert"]=this->isAlert();
-  // aggiunti campi al json per ogni sensore  (Gabriele)
-  // descrizione, unità di misura, tipo del valore ritornato,analogico o digitale, timestamp, url pagina sensore  (Gabriele) 
-  doc["description"]=this->description;
-  doc["um"]=this->um;
-  doc["typeValue"]=this->typeValue;
-  doc["da"]=this->digitOrAnal;
-  doc["timestamp"]=millis();
-  doc["url"]=this->url;
-  //doc["freqCamp"]=this->frequenzacampionamento;
+  doc["description"] = this->description;
   char json[1024];
   serializeJson(doc, json);
   return String(json);

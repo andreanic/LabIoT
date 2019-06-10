@@ -10,21 +10,16 @@ class Tilt_sensor: public Sensor {
 };
 
 Tilt_sensor::Tilt_sensor(int pin,float soglia): Sensor(pin,soglia) {
-  setMaxSoglie(40); 
-  sensorName="Tilt";
-  description="sensore tilt";
-  um = "";
-  typeValue="string";
-  digitOrAnal="float";
-  url="";
+  this->setMaxSoglie(40); 
+  this->sensorId="";
+  this->sensorName="tilt";
+  this->description="sensore tilt";
 }
 Tilt_sensor::Tilt_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
-  setMaxSoglie(40);
-  description="sensore tilt";
-  um = "";
-  typeValue="int";
-  digitOrAnal="digital";
-  url="";  
+  this->setMaxSoglie(40);
+  this->sensorId="";
+  this->sensorName="tilt";
+  this->description="sensore tilt";
 }
 
 Tilt_sensor::~Tilt_sensor(){}

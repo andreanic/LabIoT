@@ -10,10 +10,16 @@ class Vibration_sensor: public Sensor {
 };
 
 Vibration_sensor::Vibration_sensor(int pin,float soglia): Sensor(pin,soglia) {
- setMaxSoglie(40);
+ this->setMaxSoglie(40);
+ this->sensorId="";
+ this->sensorName="vibrazione";
+ this->description="sensore che rileva le vibrazioni";
 }
 Vibration_sensor::Vibration_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
-  setMaxSoglie(40);
+  this->setMaxSoglie(40);
+  this->sensorId="";
+  this->sensorName="vibrazione";
+  this->description="sensore che rileva le vibrazioni";
 }
 
 Vibration_sensor::~Vibration_sensor(){}
