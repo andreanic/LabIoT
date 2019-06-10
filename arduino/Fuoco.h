@@ -8,19 +8,25 @@ class Fuoco: public Sensor {
     Fuoco(int pin,float soglia,unsigned long frequenzacampionamento);
     ~Fuoco();
     float campiona();
-    sensorName="KY‐026";
-    description="sensore antincendio";
-    uom="";
-    typeValue="Float";
-    digitOrAnal="Digitale";
-    url="";
 };
 
 Fuoco::Fuoco(int pin,float soglia): Sensor(pin,soglia){
-  this->sensorName = "Fuoco";
+  this->sensorId="KY‐026";
+  this->sensorName="sensore antincendio";
+  this->description="sensore per il rilevamento di un incendio";
+  this->uom="";
+  this->typeValue="Float";
+  this->isDigital=true;
+  this->url="";
 }
 Fuoco::Fuoco(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
-  this->sensorName = "Fuoco";
+  this->sensorId="KY‐026";
+  this->sensorName="sensore antincendio";
+  this->description="sensore per il rilevamento di un incendio";
+  this->uom="";
+  this->typeValue="Float";
+  this->isDigital=true;
+  this->url="";
 }
 
 Fuoco::~Fuoco(){}

@@ -7,19 +7,25 @@ class Luce: public Sensor {
     Luce(int pin,float soglia,unsigned long frequenzacampionamento);
     ~Luce();
     float campiona();
-    sensorName="GROVE - LIGHT SENSOR";
-    description="sensore della luce";
-    uom="";
-    typeValue="Float";
-    digitOrAnal="Analogico";
-    url="";
 };
 
 Luce::Luce(int pin,float soglia): Sensor(pin,soglia) {
-  this->sensorName = "Luce";
+  this->sensorId="GROVE - LIGHT SENSOR";
+  this->sensorName="sensore di luce";
+  this->description="sensore che misura la luce nell'ambiente";
+  this->uom="";
+  this->typeValue="Float";
+  this->isDigital=false;
+  this->url="";
 }
 Luce::Luce(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
-  this->sensorName = "Luce";
+  this->sensorId="GROVE - LIGHT SENSOR";
+  this->sensorName="sensore di luce";
+  this->description="sensore che misura la luce nell'ambiente";
+  this->uom="";
+  this->typeValue="Float";
+  this->isDigital=false;
+  this->url="";
 }
 
 Luce::~Luce(){}

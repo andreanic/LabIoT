@@ -7,19 +7,25 @@ class Suono: public Sensor {
     Suono(int pin,float soglia,long frequenzacampionamento);
     ~Suono();
     float campiona();
-    sensorName = "GROVE - SOUND SENSOR"
-    description="microfono";
-    uom="decibel";
-    typeValue="Float";
-    digitOrAnal="Analogico";
-    url="";
 };
 
 Suono::Suono(int pin,float soglia): Sensor(pin,soglia){
-  this->sensorName = "Suono";  
+  this->sensorId="GROVE - SOUND SENSOR";
+  this->sensorName = "sensore microfonico";
+  this->description="microfono per misurare il suono nell'ambiente";
+  this->uom="decibel";
+  this->typeValue="Float";
+  this->isDigital=false;
+  this->url="";
 }
 Suono::Suono(int pin,float soglia,long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
-  this->sensorName = "Suono";  
+  this->sensorId="GROVE - SOUND SENSOR";
+  this->sensorName = "sensore microfonico";
+  this->description="microfono per misurare il suono nell'ambiente";
+  this->uom="decibel";
+  this->typeValue="Float";
+  this->isDigital=false;
+  this->url="";
 }
 
 Suono::~Suono(){}

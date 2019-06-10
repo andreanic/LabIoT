@@ -13,21 +13,27 @@ class Temperatura: public Sensor {
     Temperatura(const Temperatura& other);
     Temperatura& operator=(const Temperatura &other);
 		float campiona();
-    sensorName = "KY‐015 T"
-    description="sensore della temperatura";
-    uom="gradi centigradi";
-    typeValue="Float";
-    digitOrAnal="Digitale";
-    url="";
 };
 
 Temperatura::Temperatura(dht11 dht,int pin,float soglia): Sensor(pin,soglia){
 	this->dht = dht;
-  this->sensorName = "Temperatura";
+  this->sensorId = "KY‐015";
+  this->sensorName = "sensore umidità e temperatura";
+  this->description="sensore per misurare l'umidità e la temperatura dell'ambiente";
+  this->uom="gradi centigradi e %";
+  this->typeValue="Float";
+  this->isDigital=true;
+  this->url="";
 }
 Temperatura::Temperatura(dht11 dht,int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
   this->dht = dht;
-  this->sensorName = "Temperatura";
+  this->sensorId = "KY‐015";
+  this->sensorName = "sensore umidità e temperatura";
+  this->description="sensore per misurare l'umidità e la temperatura dell'ambiente";
+  this->uom="gradi centigradi e %";
+  this->typeValue="Float";
+  this->isDigital=true;
+  this->url="";
 }
 Temperatura::~Temperatura(){}
 

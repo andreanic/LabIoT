@@ -8,11 +8,12 @@ class Sensor {
         float soglia;
         float value;
 // NUOVI CAMPI (Gabriele)
+        String sensorId;
         String sensorName;
         String description;
         String uom;
         String typeValue;
-        String digitOrAnal;
+        boolean isDigital;
         String url;
 
         unsigned long ultimocampionamento;
@@ -39,6 +40,7 @@ class Sensor {
         void setSoglieSuccessive(float value,float soglia);
         boolean isAlert();
         String getJson();
+        String getJsonMetadata();
 };
 
 Sensor::Sensor(){
@@ -150,10 +152,11 @@ String Sensor::getJsonMetadata(){
   // aggiunti campi al json per ogni sensore  (Gabriele)
   // descrizione, unità di misura, tipo del valore ritornato,analogico o digitale, timestamp, url pagina sensore  (Gabriele) 
   doc["description"]=this->description;
-  doc["um"]=this->um;
+  doc["uom"]=this->uom;
   doc["typeValue"]=this->typeValue;
-  doc["da"]=this->digitOrAnal;
-  doc["timestamp"]=this->millis();
+  doc["isDigital"]=this->isDigital;
+  doc["sensorId"]=this->sensorId;
+  doc["timestamp"]=millis();
   doc["url"]=this->url;
   doc["freqCamp"]=this->frequenzacampionamento;
   char json[1024];

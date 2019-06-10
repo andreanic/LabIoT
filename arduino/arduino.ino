@@ -27,7 +27,8 @@ const int colorB = 255;
 int status = WL_IDLE_STATUS;
 WiFiClient client ;
 
-char serverAddress[] = "149.132.182.172";
+//String serverAddress="149.132.182.203:8080";
+char serverAddress[] = "149.132.182.121:3000";
 char mqttBroker[] = "149.132.182.121";
 int port = 8080;
 
@@ -37,10 +38,12 @@ long tempo = 0;
 long idArduino = 0;
 
 HttpClient httpClient = HttpClient(client, serverAddress, port);
+
 //////////////Wifi
 //NBmettere ip e pass della rete di labiot
 //LAB
-IPAddress ip(149, 132, 182, 46);  
+IPAddress ip(149, 132, 182, 46);
+
 WiFiService* wifiService = new WiFiService();
 WiFiClient wificlient;
 WiFiClient net; 
@@ -50,7 +53,7 @@ MQTTClient mqttClient;
 Luce *luce = new Luce(A0,0,30000);
 Temperatura *temperatura = new Temperatura(DHT,DHT11_PIN,30,60000);
 Umidita *umidita = new Umidita(DHT,DHT11_PIN,70,60000);
-Umiditemp *umiditemp = new Umiditemp(DHT,DHT11_PIN);
+//Umiditemp *umiditemp = new Umiditemp(DHT,DHT11_PIN,0,60000);
 Suono *suono = new Suono(A2,96,1000);
 Wifi *wifi = new Wifi(15000);
 Fuoco *fuoco = new Fuoco(A5,HIGH,1000);
@@ -63,9 +66,13 @@ char nota='c';
 void setup() {
   Serial.begin(115200);
   pinMode(pinBuzzer, OUTPUT);
+  
   mqttClient.begin(mqttBroker, net);
   mqttClient.onMessage(messageReceived);
-
+  mqttClient.loop();
+  if (!mqttClient.connected()) {
+    connect();
+  }
   createJsonObj(allObjJson);
   postRequest(allObjJson);
   
@@ -84,25 +91,14 @@ void loop() {
     mqttClient.publish("Help", "richiesta in soccorso"); 
     delay(20); 
   }
-  // creo JSON per i dati campionati
-  createJsonObj(allObjJson);
-  postRequest(allObjJson);
   
   // funz per dire se arduino è vivo  (Gabriele)
   long secondo = millis();
   // 600 volte 1000 millisecondi = 600 secondi
   if(secondo-tempo>=600 * 1000){
-    postRequest();
     Serial.println("sono vivo!");
-    //client.get("http://www.arduino.cc/idAssociateToArduino");
-
-    // if there are incoming bytes available
-    // from the server, read them and print them:
-    while (client.available()) {
-      idArduino = client.read();
-      SerialUSB.print(idArduino);
-    }
-    SerialUSB.flush();
+    createJsonObj(allObjJson);
+    postRequest(allObjJson);
     tempo = secondo;
   }
   
@@ -213,68 +209,65 @@ void playNote(char note, int duration) {
 
 int postRequest(String data){
   String contentType = "application/json";
-  //httpClient.post("/sensor/values/create", contentType, data);
-
+  Serial.println("in invio ...");
+  Serial.println(data);
   httpClient.beginRequest();
-  httpClient.post("/sensor/values/create");
   httpClient.sendHeader("Content-Type", contentType);
   httpClient.sendHeader("Content-Length", data.length());
+  httpClient.post("/", contentType, data);
   httpClient.beginBody();
   httpClient.print(data);
   httpClient.endRequest();
-  
+  Serial.println("... inviato!");
   int statusCode = httpClient.responseStatusCode();
+  Serial.println(statusCode);
 
   // 200 (ricev success) 400 (bad request) 404 (not found) 500 (Mostrare messaggio ricevuto)
   if(statusCode == 200){
-    // prendo il Json e prendo l'id di arduino e glielo metto
-    httpClient.get("http://www.arduino.cc/idAssociateToArduino"); // cambiare con link web server.
-    JsonObject obj = client.read();
+    // prendo il Json, estraggo l'id di arduino e glielo imposto
+    String response = httpClient.responseBody();
+    Serial.println("Success 200");
+    StaticJsonDocument<200> obj;
+    deserializeJson(obj, response);
     idArduino = obj["deviceId"];
+    Serial.print("ID: ");
+    Serial.println(idArduino);
   } else if(statusCode == 400){
-    Serial.print("Errore 400!");
+    Serial.println("Errore 400!");
   } else if(statusCode == 404){
-    Serial.print("Non Trovato Error 404");
+    Serial.println("Non Trovato, Errore 404");
   } else if(statusCode == 500){
-    JsonObject obj = httpClient.get("http://www.arduino.cc/idAssociateToArduino");
-    serializeJson(obj, Serial);
+    String response = httpClient.responseBody();
+    StaticJsonDocument<200> obj;
+    deserializeJson(obj, response);
+    serializeJson(obj["payload"], Serial);
+    Serial.println("Errore 500");
+    //serializeJson(client.read(), Serial);
   }
   return statusCode;
 }
 
 
-void createJsonObj(String &allObjJson) {
-  StaticJsonDocument<1024> doc;
-  //JsonArray array = doc.to<JsonArray>();
-  String luceJson = luce->getJsonMetadata();
-  String umiditempJson = umiditemp->getJsonMetadata();
-  String suonoJson = suono->getJsonMetadata();
-  String wifiJson = wifi->getJsonMetadata();
-  String fuocoJson = fuoco->getJsonMetadata();
-  array.add(luceJson);
-  array.add(umiditempJson);
-  array.add(suonoJson);
-  array.add(wifiJson);
-  array.add(fuocoJson);
-  array.add("deviceId:\""+idArduino+"\"");
-  serializeJson(doc, allObjJson);
-}
-
 // fare una funzione che prende device {device: {deviceName:"arduino MKR 1000",deviceId:"100000"}} 
 
-void createJsonObjDevice(String &allObjJson) {
+void createJsonObj(String &allObjJson) {
   StaticJsonDocument<1024> doc;
-  //JsonArray array = doc.to<JsonArray>();
+  //JsonObject root = doc.to<JsonObject>();
+  //JsonObject object = root.createNestedObject("device");
+  doc["deviceName"]="arduino MKR 1000";
+  doc["deviceId"]=idArduino;
+  JsonArray array = doc.createNestedArray("sensors");
   String luceJson = luce->getJsonMetadata();
-  String umiditempJson = umiditemp->getJsonMetadata();
+  String umiditaJson = umidita->getJsonMetadata();
   String suonoJson = suono->getJsonMetadata();
   String wifiJson = wifi->getJsonMetadata();
   String fuocoJson = fuoco->getJsonMetadata();
   array.add(luceJson);
-  array.add(umiditempJson);
+  array.add(umiditaJson);
   array.add(suonoJson);
   array.add(wifiJson);
   array.add(fuocoJson);
-  array.add("deviceId:\""+idArduino+"\"");
   serializeJson(doc, allObjJson);
 }
+
+// fare una funzione che fa parse sempre una stringa ... questo payload poi lo passo sempre
