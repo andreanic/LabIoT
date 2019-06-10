@@ -1,0 +1,17 @@
+server:
+  port: 8080
+  
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/iot1?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: root
+  autoconfigure:
+    exclude:
+    - DataSourceAutoConfiguration.class
+    - HibernateJpaAutoConfiguration.class
+  data:
+    jpa:
+      repositories:
+        enabled: true    
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect

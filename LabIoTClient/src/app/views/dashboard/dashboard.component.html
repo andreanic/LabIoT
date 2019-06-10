@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-4">
+      <h2>Sensor Values</h2>
+      <ul class="list-group">
+        <button class="list-group-item list-group-item-action" *ngFor="let sensorValue of sensorValues" [class.alert]="sensorValue.isAlert"
+        (click)="showMore(sensorValue)">
+          {{sensorValue.sensorName}}: {{sensorValue.value}}
+        </button>
+      </ul>
+    </div>
+  </div>
+  <div class="row justify-content-center mt-3">
+    <div class="col-4">
+      <div class="row">
+        <div class="col">
+          <button type="button" class="col btn btn-success" [disabled]="!isStopped" (click)="startMonitoring()">Start</button>
+        </div>
+        <div class="col">
+          <button type="button" class="col btn btn-danger" [disabled]="isStopped" (click)="stopMonitoring()">Stop</button>
+        </div>
+      </div>
+    </div>
+  </div>  
+
+  <div class="row justify-content-center mt-5" *ngIf="specificSensorValues">
+    <div class="col-4">
+      <p class="font-weight-bold">{{tableTitle}}</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Valore</th>
+            <th scope="col">Orario</th>
+            <th scope="col">Alert</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sensorValue of specificSensorValues">
+            <td>{{sensorValue.value}}</td>
+            <td>{{sensorValue.dataInserimento}}</td>
+            <td>{{sensorValue.isAlert ? "Si" : "No"}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
