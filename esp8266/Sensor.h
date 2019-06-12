@@ -34,7 +34,7 @@ class Sensor {
         void setSoglieSuccessive(float value,float soglia);
         boolean isAlert();
         void setMaxSoglie(int n);
-        String getJsonMetadata();
+        void getJsonMetadata(const JsonObject &object);
 };
 
 Sensor::Sensor(){
@@ -131,13 +131,13 @@ boolean Sensor::isAlert(){
 void Sensor::setMaxSoglie(int n){
   this->maxSoglieSuccessive = n;  
 }
-String Sensor::getJsonMetadata(){
-  DynamicJsonDocument doc(1024);
-  doc["sensorId"]=this->sensorId;
-  doc["sensorName"] = this->sensorName;
-  doc["description"] = this->description;
+void Sensor::getJsonMetadata(const JsonObject &object){
+  //DynamicJsonDocument doc(1024);
+  object["sensorId"]=this->sensorId;
+  object["sensorName"] = this->sensorName;
+  object["description"] = this->description;
   char json[1024];
-  serializeJson(doc, json);
-  return String(json);
+  //serializeJson(doc, json);
+  //return String(json);
 }
 #endif
