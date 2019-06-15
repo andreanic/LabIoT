@@ -1,6 +1,7 @@
 ////////////Librerie
 //LAB
-#include <WiFi101.h> 
+//#include <WiFi101.h> 
+#include <WiFiNINA.h>
 #include <SPI.h>
 #include <MQTT.h>
 #include "rgb_lcd.h"
@@ -14,7 +15,6 @@
 #include "Suono.h"
 #include "WiFiService.h"
 #include "Button_simple.h"
-
 ////////variabili/costanti
 const int pinBuzzer = 0;
 #define DHT11_PIN 4
@@ -27,12 +27,17 @@ const int colorB = 255;
 int status = WL_IDLE_STATUS;
 WiFiClient client ;
 
+
+
+
 //String serverAddress="149.132.182.203:8080";
 char serverAddress[] = "149.132.182.121:3000";
 char mqttBroker[] = "149.132.182.121";
+IPAddress ip(149, 132, 182, 46);
 int port = 8080;
 
 String allObjJson;
+unsigned int boardId =0;
 // tempo e id di Arduino
 long tempo = 0;
 long idArduino = 0;
@@ -40,9 +45,7 @@ long idArduino = 0;
 HttpClient httpClient = HttpClient(client, serverAddress, port);
 
 //////////////Wifi
-//NBmettere ip e pass della rete di labiot
-//LAB
-IPAddress ip(149, 132, 182, 46);
+
 
 WiFiService* wifiService = new WiFiService();
 WiFiClient wificlient;
@@ -66,14 +69,13 @@ char nota='c';
 void setup() {
   Serial.begin(115200);
   pinMode(pinBuzzer, OUTPUT);
-  
   mqttClient.begin(mqttBroker, net);
   mqttClient.onMessage(messageReceived);
   mqttClient.loop();
   if (!mqttClient.connected()) {
     connect();
   }
-  createJsonObj(allObjJson);
+  createJsonObj(allObjJson,boardId);
   postRequest(allObjJson);
   
 }
@@ -97,7 +99,7 @@ void loop() {
   // 600 volte 1000 millisecondi = 600 secondi
   if(secondo-tempo>=600 * 1000){
     Serial.println("sono vivo!");
-    createJsonObj(allObjJson);
+    createJsonObj(allObjJson,boardId);
     postRequest(allObjJson);
     tempo = secondo;
   }
@@ -207,6 +209,7 @@ void playNote(char note, int duration) {
  }
 }
 
+//TIP:passargli il path perchè così non va bene
 int postRequest(String data){
   String contentType = "application/json";
   Serial.println("in invio ...");
@@ -214,7 +217,7 @@ int postRequest(String data){
   httpClient.beginRequest();
   httpClient.sendHeader("Content-Type", contentType);
   httpClient.sendHeader("Content-Length", data.length());
-  httpClient.post("/", contentType, data);
+  httpClient.post("/testPost", contentType, data);
   httpClient.beginBody();
   httpClient.print(data);
   httpClient.endRequest();
@@ -250,8 +253,8 @@ int postRequest(String data){
 
 // fare una funzione che prende device {device: {deviceName:"arduino MKR 1000",deviceId:"100000"}} 
 
-void createJsonObj(String &allObjJson) {
-  StaticJsonDocument<1024> doc;
+void createJsonObj(String &allObjJson,unsigned int board) {
+ /* StaticJsonDocument<1024> doc;
   //JsonObject root = doc.to<JsonObject>();
   //JsonObject object = root.createNestedObject("device");
   doc["deviceName"]="arduino MKR 1000";
@@ -267,7 +270,21 @@ void createJsonObj(String &allObjJson) {
   array.add(suonoJson);
   array.add(wifiJson);
   array.add(fuocoJson);
-  serializeJson(doc, allObjJson);
+  serializeJson(doc, allObjJson);*/
+  StaticJsonDocument<1024> doc;
+  JsonObject root = doc.to<JsonObject>();
+  JsonObject device = root.createNestedObject("device");
+  device["deviceName"]="MKR1000";
+  if(board != 0){
+    device["deviceId"]=board;  
+  }
+  JsonArray sensors = root.createNestedArray("sensors");
+  luce->getJsonMetadata(sensors.createNestedObject());
+  umidita->getJsonMetadata(sensors.createNestedObject());
+  suono->getJsonMetadata(sensors.createNestedObject());
+  wifi->getJsonMetadata(sensors.createNestedObject());
+  fuoco->getJsonMetadata(sensors.createNestedObject());
+  serializeJson(root, allObjJson);
 }
 
 // fare una funzione che fa parse sempre una stringa ... questo payload poi lo passo sempre

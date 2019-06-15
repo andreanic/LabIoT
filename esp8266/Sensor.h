@@ -132,12 +132,8 @@ void Sensor::setMaxSoglie(int n){
   this->maxSoglieSuccessive = n;  
 }
 void Sensor::getJsonMetadata(const JsonObject &object){
-  //DynamicJsonDocument doc(1024);
   object["sensorId"]=this->sensorId;
   object["sensorName"] = this->sensorName;
   object["description"] = this->description;
-  char json[1024];
-  //serializeJson(doc, json);
-  //return String(json);
 }
 #endif

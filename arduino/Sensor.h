@@ -40,7 +40,7 @@ class Sensor {
         void setSoglieSuccessive(float value,float soglia);
         boolean isAlert();
         String getJson();
-        String getJsonMetadata();
+        void getJsonMetadata(const JsonObject &object);
 };
 
 Sensor::Sensor(){
@@ -146,8 +146,8 @@ String Sensor::getJson(){
   return String(json);
 }
 
-String Sensor::getJsonMetadata(){
-  DynamicJsonDocument doc(1024);
+
+  /*DynamicJsonDocument doc(1024);
   doc["sensorName"] = this->sensorName;
   // aggiunti campi al json per ogni sensore  (Gabriele)
   // descrizione, unità di misura, tipo del valore ritornato,analogico o digitale, timestamp, url pagina sensore  (Gabriele) 
@@ -162,6 +162,10 @@ String Sensor::getJsonMetadata(){
   char json[1024];
   serializeJson(doc, json);
 
-  return String(json);
-}
+  return String(json);*/
+  void Sensor::getJsonMetadata(const JsonObject &object){
+  object["sensorId"]=this->sensorId;
+  object["sensorName"] = this->sensorName;
+  object["description"] = this->description;
+ }
 #endif

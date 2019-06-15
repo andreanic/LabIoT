@@ -1,6 +1,7 @@
 #ifndef WIFISERVICE_H
 #define WIFISERVICE_H
 #include <WiFi101.h>
+
 class WiFiService{
   private: 
     String ssid = "IoTLabThingsU14";         
@@ -12,7 +13,7 @@ class WiFiService{
 };
 
 void WiFiService::connect(IPAddress ip){
-   IPAddress dns(149, 132, 2, 3);  
+   IPAddress dns(149, 132, 2, 3);    
    IPAddress gateway(149, 132, 182, 1);  
    IPAddress mask(255, 255, 255, 0);  
    

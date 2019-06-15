@@ -1,6 +1,6 @@
 #ifndef WIFIPOWER_H
 #define WIFIPOWER_H
-#include <WiFi101.h>
+//#include <WiFi101.h>
 #include "Sensor.h"
 class Wifi: public Sensor{
   public:
