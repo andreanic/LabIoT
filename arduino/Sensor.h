@@ -137,7 +137,7 @@ boolean Sensor::isAlert(){
 
 String Sensor::getJson(){
   DynamicJsonDocument doc(1024);
-  doc["sensorName"] = this->sensorName;
+  doc["sensorId"] = this->sensorId;
   doc["value"] = this->value;
   doc["isAlert"]=this->isAlert();
   char json[1024];
@@ -146,11 +146,8 @@ String Sensor::getJson(){
   return String(json);
 }
 
-
   /*DynamicJsonDocument doc(1024);
   doc["sensorName"] = this->sensorName;
-  // aggiunti campi al json per ogni sensore  (Gabriele)
-  // descrizione, unità di misura, tipo del valore ritornato,analogico o digitale, timestamp, url pagina sensore  (Gabriele) 
   doc["description"]=this->description;
   doc["uom"]=this->uom;
   doc["typeValue"]=this->typeValue;
@@ -161,11 +158,11 @@ String Sensor::getJson(){
   doc["freqCamp"]=this->frequenzacampionamento;
   char json[1024];
   serializeJson(doc, json);
-
   return String(json);*/
   void Sensor::getJsonMetadata(const JsonObject &object){
   object["sensorId"]=this->sensorId;
   object["sensorName"] = this->sensorName;
   object["description"] = this->description;
  }
+
 #endif

@@ -16,20 +16,20 @@ class Umidita: public Sensor {
 
 Umidita::Umidita(dht11 dht, int pin,float soglia): Sensor(pin,soglia){
 	this->dht = dht;
-  this->sensorId = "KY‐015";
-  this->sensorName = "sensore umidità e temperatura";
-  this->description="sensore per misurare l'umidità e la temperatura dell'ambiente";
-  this->uom="gradi centigradi e %";
+  this->sensorId = "KY‐015U";
+  this->sensorName = "sensore umidità";
+  this->description="sensore per misurare l'umidità dell'ambiente";
+  this->uom="umidità in %";
   this->typeValue="Float";
   this->isDigital=true;
   this->url="";
 }
 Umidita::Umidita(dht11 dht, int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
   this->dht = dht;
-  this->sensorId = "KY‐015";
-  this->sensorName = "sensore umidità e temperatura";
-  this->description="sensore per misurare l'umidità e la temperatura dell'ambiente";
-  this->uom="gradi centigradi e %";
+  this->sensorId = "KY‐015U";
+  this->sensorName = "sensore umidità";
+  this->description="sensore per misurare l'umidità dell'ambiente";
+  this->uom="umidità in %";
   this->typeValue="Float";
   this->isDigital=true;
   this->url="";
