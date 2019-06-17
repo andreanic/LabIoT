@@ -18,7 +18,7 @@ class Temperatura: public Sensor {
 Temperatura::Temperatura(dht11 dht,int pin,float soglia): Sensor(pin,soglia){
 	this->dht = dht;
   this->sensorId = "KY‐015T";
-  this->sensorName = "sensoretemperatura";
+  this->sensorName = "sensore temperatura";
   this->description="sensore per misurare la temperatura dell'ambiente";
   this->uom="gradi centigradi";
   this->typeValue="Float";
@@ -28,7 +28,7 @@ Temperatura::Temperatura(dht11 dht,int pin,float soglia): Sensor(pin,soglia){
 Temperatura::Temperatura(dht11 dht,int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
   this->dht = dht;
   this->sensorId = "KY‐015T";
-  this->sensorName = "sensoretemperatura";
+  this->sensorName = "sensore temperatura";
   this->description="sensore per misurare la temperatura dell'ambiente";
   this->uom="gradi centigradi";
   this->typeValue="Float";
