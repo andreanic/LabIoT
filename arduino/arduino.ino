@@ -91,7 +91,7 @@ void loop() {
   campionaDati();
   if(button->isPressed()){
     Serial.println("RICHIESTA AIUTO ACCETTATA");
-    mqttClient.publish("Help", "richiesta in soccorso"); 
+    mqttClient.publish("Help", "richiesta in soccorso",1); 
     delay(20); 
   }
   
@@ -137,9 +137,12 @@ void connect(){
     delay(50);
   }
   Serial.println("\nSubscribing");
+  //0 default perchè alcuni dati si potrebbero perdere e non importa
   mqttClient.subscribe("dati");
-  mqttClient.subscribe("alert");
-  mqttClient.subscribe("aiuto");
+  //1 perchè arriva almeno 1 volta
+  mqttClient.subscribe("alert",1);
+  //1
+  mqttClient.subscribe("aiuto",1);
 }
 
 void campionaDati(){
