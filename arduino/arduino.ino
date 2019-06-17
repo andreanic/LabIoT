@@ -27,6 +27,7 @@ int status = WL_IDLE_STATUS;
 WiFiClient client ;
 
 //String serverAddress="149.132.182.203";
+// int port = 8080;
 char serverAddress[] = "149.132.182.121";
 char mqttBroker[] = "149.132.182.121";
 IPAddress ip(149, 132, 182, 46);

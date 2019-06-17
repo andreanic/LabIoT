@@ -33,11 +33,11 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress gateway(192,168,1,1);
 const char *mqttserver ="192.168.1.102";
 ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);*/
+unsigned long aliveFrequency = 6000; //6 secondi
+unsigned long lastAliveSignal;
 
-
-
-String webServerAddress="149.132.182.203:8080";
-//String webServerAddress="149.132.182.121:3000";
+//String webServerAddress="149.132.182.203:8080";
+String webServerAddress="149.132.182.121:3000";
 MQTTInterface *mqtt = new ESP8266MQTT(mqttserver,1883);
 Tilt_sensor *tilt = new Tilt_sensor(D2,1,50);
 Heartbeat_sensor *heartbeat= new Heartbeat_sensor(A0,144,3000);
@@ -46,10 +46,10 @@ float oldvalue_vibrazione = -1;
 float oldvalue_heart = -1;
 float oldvalue_tilt = -1;
 //connetere un led e un button ky-004
-/*Led_actuator *led = new Led_actuator(D1);
+Led_actuator *led = new Led_actuator(D1);
 Led_actuator *ledHelp = new Led_actuator(D8);
 Button_simple *button = new Button_simple(D3);
-Button_simple *buttonHelp = new Button_simple(D7);*/
+Button_simple *buttonHelp = new Button_simple(D7);
 
 unsigned int boardId=0;
 const unsigned long heartbeatFrequency=600000;
@@ -62,17 +62,20 @@ void setup() {
   while(!Serial){}
   ESP8266Wifi.connect();
   mqtt->setCallback(callback);
-  String allObjJson; 
-  createJsonObj(allObjJson,boardId);
-  //String request = "http://"+webServerAddress+"/testPost";
-  String request = "http://"+webServerAddress+"/device/subscribe";
-  int httpCode;
-  String payload;
-  httpPost(request,allObjJson,httpCode,payload);
-  if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
-    boardId = getDeviceIdFromHttp(payload);  
+  if(millis() - lastAliveSignal  >= aliveFrequency || boardId == 0){
+    String allObjJson; 
+    createJsonObj(allObjJson,boardId);
+    String request = "http://"+webServerAddress+"/testPost";
+    //String request = "http://"+webServerAddress+"/device/subscribe";
+    int httpCode;
+    String payload;
+    httpPost(request,allObjJson,httpCode,payload);
+    if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
+      boardId = getDeviceIdFromHttp(payload);  
+    }
+    Serial.println("Id board:" + String(boardId));  
   }
-  Serial.println("Id board:" + String(boardId));
+  
 }
 
 void loop() {
@@ -84,16 +87,19 @@ void loop() {
       //mqtt->subscribe("Help");
   }
   mqtt->loop();
+  //se passati 6 secondi o se boardid = 0
+  
   String allObjJson; 
   createJsonObj(allObjJson,boardId);
-  //String request = "http://"+webServerAddress+"/testPost";
-  String request = "http://"+webServerAddress+"/device/subscribe";
+  String request = "http://"+webServerAddress+"/testPost";
+  //String request = "http://"+webServerAddress+"/device/subscribe";
   int httpCode;
   String payload;
   httpPost(request,allObjJson,httpCode, payload);
   if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
     boardId = getDeviceIdFromHttp(payload);  
   }
+  
   Serial.println("Id board:" + String(boardId));
   
   if(button->isPressed()){
