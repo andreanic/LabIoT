@@ -7,7 +7,6 @@ class Sensor {
         int pin;
         float soglia;
         float value;
-// NUOVI CAMPI (Gabriele)
         String sensorId;
         String sensorName;
         String description;
@@ -146,23 +145,10 @@ String Sensor::getJson(){
   return String(json);
 }
 
-  /*DynamicJsonDocument doc(1024);
-  doc["sensorName"] = this->sensorName;
-  doc["description"]=this->description;
-  doc["uom"]=this->uom;
-  doc["typeValue"]=this->typeValue;
-  doc["isDigital"]=this->isDigital;
-  doc["sensorId"]=this->sensorId;
-  doc["timestamp"]=millis();
-  doc["url"]=this->url;
-  doc["freqCamp"]=this->frequenzacampionamento;
-  char json[1024];
-  serializeJson(doc, json);
-  return String(json);*/
-  void Sensor::getJsonMetadata(const JsonObject &object){
+void Sensor::getJsonMetadata(const JsonObject &object){
   object["sensorId"]=this->sensorId;
   object["sensorName"] = this->sensorName;
   object["description"] = this->description;
- }
+}
 
 #endif
