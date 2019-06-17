@@ -127,7 +127,7 @@ void Sensor::setSoglieSuccessive(float value,float soglia){
       this->soglieSuccessive=this->soglieSuccessive + 1;  
     }
     else {
-      this->soglieSuccessive =0;  
+      this->soglieSuccessive=0;  
     }
  }
 boolean Sensor::isAlert(){

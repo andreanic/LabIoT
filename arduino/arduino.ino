@@ -41,7 +41,7 @@ long tempo = 0;
 long idArduino = 0;
 
 HttpClient httpClient = HttpClient(client, serverAddress, port);
-//String request = "http://"+webServerAddress+"/device/subscribe";
+String request = "http://"+webServerAddress+"/device/subscribe";
 String request = "http://"+webServerAddress+"/testPost";
 String datiPath="";
 //////////////Wifi
