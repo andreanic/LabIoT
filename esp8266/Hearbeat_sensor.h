@@ -14,11 +14,19 @@ Heartbeat_sensor::Heartbeat_sensor(int pin,float soglia): Sensor(pin,soglia) {
         this->sensorId="KY‐039";
         this->sensorName="sensore heartbeat";
         this->description="Il sensore attraverso un led e un fototransistor misura le pulsazioni del dito";
+        this->uom="battiti al minuto";
+        this->typeValue="Float";
+        this->isDigital=false;
+        this->url="";
 }
 Heartbeat_sensor::Heartbeat_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
         this->sensorId="KY‐039";
         this->sensorName="sensore heartbeat";
         this->description="Il sensore attraverso un led e un fototransistor misura le pulsazioni del dito";
+        this->uom="battiti al minuto";
+        this->typeValue="Float";
+        this->isDigital=false;
+        this->url="";
 }
 
 Heartbeat_sensor::~Heartbeat_sensor(){}

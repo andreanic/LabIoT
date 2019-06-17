@@ -28,6 +28,7 @@ WiFiClient client ;
 
 //String serverAddress="149.132.182.203";
 //String webServerAddress="149.132.182.203:8080";
+// CAMBIARE L'INDIRIZZO !!!!
 String webServerAddress="149.132.182.121";
 char serverAddress[] = "149.132.182.121";
 char mqttBroker[] = "149.132.182.121";
@@ -94,10 +95,10 @@ void loop() {
     mqttClient.publish("Help", "richiesta in soccorso",1); 
     delay(20); 
   }
-  
-  // funz per dire se arduino è vivo  (Gabriele)
+
+
   long secondo = millis();
-  if(secondo-tempo>=2000){
+  if(secondo-tempo>=10000){
     Serial.println("sono vivo!");
     String allObjJson;
     createJsonObj(allObjJson,boardId);

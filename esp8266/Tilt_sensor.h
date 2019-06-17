@@ -14,12 +14,20 @@ Tilt_sensor::Tilt_sensor(int pin,float soglia): Sensor(pin,soglia) {
   this->sensorId="KY‐020";
   this->sensorName="sensore tilt";
   this->description="sensore tilt";
+  this->uom="";
+  this->typeValue="Float";
+  this->isDigital=true;
+  this->url="";
 }
 Tilt_sensor::Tilt_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
   this->setMaxSoglie(40);
   this->sensorId="KY‐020";
   this->sensorName="sensore tilt";
   this->description="sensore tilt";
+  this->uom="";
+  this->typeValue="Float";
+  this->isDigital=true;
+  this->url="";
 }
 
 Tilt_sensor::~Tilt_sensor(){}

@@ -149,6 +149,10 @@ void Sensor::getJsonMetadata(const JsonObject &object){
   object["sensorId"]=this->sensorId;
   object["sensorName"] = this->sensorName;
   object["description"] = this->description;
+  object["uom"]=this->uom;
+  object["typeValue"]=this->typeValue;
+  object["isDigital"]=this->isDigital;
+  object["url"]=this->url;
 }
 
 #endif
