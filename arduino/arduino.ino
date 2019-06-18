@@ -93,14 +93,9 @@ void loop() {
   if (!mqttClient.connected()) {
     connect();
   }
-
-  campionaDati();
-  if(button->isPressed()){
-    Serial.println("RICHIESTA AIUTO ACCETTATA");
-    mqttClient.publish("Help", "richiesta in soccorso",1); 
-    delay(20); 
+  if(boardId!=0){
+    campionaDati();
   }
-
 
   long secondo = millis();
   if(secondo-tempo>=30000){
@@ -114,23 +109,22 @@ void loop() {
     }
     tempo = secondo;
   }
-
-  delay(30000);
 }
 
 void messageReceived(String &topic, String &payload) {
   Serial.println("Payload -> " + payload);
+  String payloadDati;
   if(topic ==  "aiuto"){
     Serial.println("Ricevo aiuto");
     playNote('C',500);
   }
   else if(topic == "dati"){
     Serial.println("Ricevo dati");
-    //postRequest(payload);
+    postRequest(payload,datiPath,payloadDati);
   }
   else if(topic == "alert"){
     Serial.println("Ricevo alert");
-    //postRequest(payload);
+    postRequest(payload,datiPath,payloadDati);
     playNote('d',500);
   }
 }
