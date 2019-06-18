@@ -16,23 +16,23 @@ class Umidita: public Sensor {
 
 Umidita::Umidita(dht11 dht, int pin,float soglia): Sensor(pin,soglia){
 	this->dht = dht;
-  this->sensorId = "KY‐015U";
+  this->sensorId = "KY015U";
   this->sensorName = "sensore umidità";
-  this->description="sensore per misurare l'umidità dell'ambiente";
+  this->description="sensore per misurare l\'umidità dell\'ambiente";
   this->uom="umidità in %";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-015_Temperature_and_humidity_sensor_module";
 }
 Umidita::Umidita(dht11 dht, int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
   this->dht = dht;
-  this->sensorId = "KY‐015U";
+  this->sensorId = "KY015U";
   this->sensorName = "sensore umidità";
-  this->description="sensore per misurare l'umidità dell'ambiente";
+  this->description="sensore per misurare l\'umidità dell\'ambiente";
   this->uom="umidità in %";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-015_Temperature_and_humidity_sensor_module";
 }
 Umidita::~Umidita(){}
 

@@ -10,22 +10,22 @@ class Suono: public Sensor {
 };
 
 Suono::Suono(int pin,float soglia): Sensor(pin,soglia){
-  this->sensorId="GROVE - SOUND SENSOR";
+  this->sensorId="GROVE SOUND SENSOR";
   this->sensorName = "sensore microfonico";
-  this->description="microfono per misurare il suono nell'ambiente";
+  this->description="microfono per misurare il suono nell\'ambiente";
   this->uom="decibel";
   this->typeValue="Float";
   this->isDigital=false;
-  this->url="";
+  this->url="http://wiki.seeedstudio.com/Grove-Sound_Sensor/";
 }
 Suono::Suono(int pin,float soglia,long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
-  this->sensorId="GROVE - SOUND SENSOR";
+  this->sensorId="GROVE SOUND SENSOR";
   this->sensorName = "sensore microfonico";
-  this->description="microfono per misurare il suono nell'ambiente";
+  this->description="microfono per misurare il suono nell\'ambiente";
   this->uom="decibel";
   this->typeValue="Float";
   this->isDigital=false;
-  this->url="";
+  this->url="http://wiki.seeedstudio.com/Grove-Sound_Sensor/";
 }
 
 Suono::~Suono(){}

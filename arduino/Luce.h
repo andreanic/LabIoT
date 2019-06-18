@@ -10,22 +10,22 @@ class Luce: public Sensor {
 };
 
 Luce::Luce(int pin,float soglia): Sensor(pin,soglia) {
-  this->sensorId="GROVE - LIGHT SENSOR";
+  this->sensorId="GROVE LIGHT SENSOR";
   this->sensorName="sensore di luce";
-  this->description="sensore che misura la luce nell'ambiente";
+  this->description="sensore che misura la luce nell\'ambiente";
   this->uom="";
   this->typeValue="Float";
   this->isDigital=false;
-  this->url="";
+  this->url="http://wiki.seeedstudio.com/Grove-Light_Sensor/";
 }
 Luce::Luce(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
-  this->sensorId="GROVE - LIGHT SENSOR";
+  this->sensorId="GROVE LIGHT SENSOR";
   this->sensorName="sensore di luce";
-  this->description="sensore che misura la luce nell'ambiente";
+  this->description="sensore che misura la luce nell\'ambiente";
   this->uom="";
   this->typeValue="Float";
   this->isDigital=false;
-  this->url="";
+  this->url="http://wiki.seeedstudio.com/Grove-Light_Sensor/";
 }
 
 Luce::~Luce(){}
