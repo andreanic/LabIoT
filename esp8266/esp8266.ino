@@ -91,9 +91,8 @@ void loop() {
       mqtt->subscribe("stop",1);
   }
   mqtt->loop();
-  if(enabled == true){
-      unsigned long currentAlive = millis();
-    if(currentAlive - lastAliveSignal  >= aliveFrequency || boardId == 0){
+     unsigned long currentAlive = millis();
+     if(currentAlive - lastAliveSignal  >= aliveFrequency || boardId == 0){
       String allObjJson; 
       createJsonObj(allObjJson,boardId);
       //String request = "http://"+webServerAddress+"/testPost";
@@ -106,9 +105,8 @@ void loop() {
       }
       lastAliveSignal = currentAlive;
       Serial.println("Id board:" + String(boardId));
-    }
-    
-    
+   }
+  if(enabled == true){ 
     if(button->isPressed()){
         led->activate(LOW);
         ledHelp->activate(LOW);
