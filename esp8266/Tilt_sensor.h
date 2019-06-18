@@ -11,7 +11,7 @@ class Tilt_sensor: public Sensor {
 
 Tilt_sensor::Tilt_sensor(int pin,float soglia): Sensor(pin,soglia) {
   this->setMaxSoglie(40); 
-  this->sensorId="KY‐020";
+  this->sensorId="KY020";
   this->sensorName="sensore tilt";
   this->description="sensore tilt";
   this->uom="";
@@ -21,7 +21,7 @@ Tilt_sensor::Tilt_sensor(int pin,float soglia): Sensor(pin,soglia) {
 }
 Tilt_sensor::Tilt_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
   this->setMaxSoglie(40);
-  this->sensorId="KY‐020";
+  this->sensorId="KY020";
   this->sensorName="sensore tilt";
   this->description="sensore tilt";
   this->uom="";

@@ -26,14 +26,19 @@ const int colorB = 255;
 int status = WL_IDLE_STATUS;
 WiFiClient client ;
 
-
-//String webServerAddress="149.132.182.203:8080";
-String webServerAddress="149.132.182.121:3000";
-//char serverAddress[] = "149.132.182.203";
-char serverAddress[] = "149.132.182.121";
+///Andrea
+String webServerAddress="149.132.182.203:8080";
+char serverAddress[] = "149.132.182.203";
 char mqttBroker[] = "149.132.182.203";
+int port = 8080;
+//Marco
+/*String webServerAddress="149.132.182.121:3000";
+char serverAddress[] = "149.132.182.121";
+char mqttBroker[] = "149.132.182.121";
+int port = 3000;*/
+//////////////////////
 IPAddress ip(149, 132, 182, 46);
-int port = 3000;
+
 
 String allObjJson;
 unsigned int boardId =0;
@@ -42,9 +47,9 @@ long tempo = 0;
 long idArduino = 0;
 
 HttpClient httpClient = HttpClient(client, serverAddress, port);
-//String request = "http://"+webServerAddress+"/device/subscribe";
-String request = "http://"+webServerAddress+"/testPost";
-String datiPath="http://"+webServerAddress+"sensors/values/create";
+String subscribePath = "/device/subscribe";
+//String request = "http://"+webServerAddress+"/testPost";
+String datiPath="/sensor/values/create";
 //////////////Wifi
 WiFiService* wifiService = new WiFiService();
 WiFiClient wificlient;
@@ -76,7 +81,7 @@ void setup() {
   String allObjJson;
   createJsonObj(allObjJson,boardId);
   String payload;
-  int statuscode = postRequest(allObjJson,request,payload);  
+  int statuscode = postRequest(allObjJson,subscribePath,payload);  
   if(statuscode == 200){
     getDeviceId(payload);
   }
@@ -103,7 +108,7 @@ void loop() {
     String allObjJson;
     createJsonObj(allObjJson,boardId);
     String payload;
-    int statuscode = postRequest(allObjJson,request,payload);  
+    int statuscode = postRequest(allObjJson,subscribePath,payload);  
     if(statuscode == 200){
       getDeviceId(payload);
     }
@@ -138,7 +143,7 @@ void connect(){
     Serial.print(".");
     delay(50);
   }
-  Serial.println("\nSubscribing");
+  Serial.println("\nMQTT Subscribing");
   //0 default perchè alcuni dati si potrebbero perdere e non importa
   mqttClient.subscribe("dati");
   //1 perchè arriva almeno 1 volta
@@ -154,42 +159,42 @@ void campionaDati(){
         nota = 'C';
         float fuocoValue =fuoco->campiona();  
         //Serial.println("Inserisco Fuoco");
-        postRequest(fuoco->getJson(),datiPath,payloadDati);
+        postRequest(fuoco->getJson(boardId),datiPath,payloadDati);
         fuoco->setUltimoCampionamento(current);
     }
     if(suono->canSense(current)){
         nota = 'c';
         float suonoValue = suono->campiona();
         //Serial.println("Inserisco Suono -> " + String(suonoValue));
-        postRequest(suono->getJson(),datiPath,payloadDati);
+        postRequest(suono->getJson(boardId),datiPath,payloadDati);
         suono->setUltimoCampionamento(current);
     }
     if(luce->canSense(current)){
         nota = 'd';
         float luceValue=luce->campiona();
         //Serial.println("Inserisco Luce");
-        postRequest(luce->getJson(),datiPath,payloadDati);
+        postRequest(luce->getJson(boardId),datiPath,payloadDati);
         luce->setUltimoCampionamento(current);
     }
     if(temperatura->canSense(current)){
         nota = 'e';
         float tempValue=temperatura->campiona();
         //Serial.println("Inserisco Temp");
-        postRequest(temperatura->getJson(),datiPath,payloadDati);
+        postRequest(temperatura->getJson(boardId),datiPath,payloadDati);
         temperatura->setUltimoCampionamento(current);
     }
     if(umidita->canSense(current)){
         nota = 'f';
         float umidValue=umidita->campiona();
         //Serial.println("Inserisco Umidita");
-        postRequest(umidita->getJson(),datiPath,payloadDati);
+        postRequest(umidita->getJson(boardId),datiPath,payloadDati);
         umidita->setUltimoCampionamento(current);
     }
     if(wifi->canSense(current)){
         nota = 'a';
         float wifiValue= wifi->campiona();
         //Serial.println("Inserisco Wifi");
-        postRequest(wifi->getJson(),datiPath,payloadDati);
+        postRequest(wifi->getJson(boardId),datiPath,payloadDati);
         wifi->setUltimoCampionamento(current);
     }
 }
@@ -223,19 +228,16 @@ int postRequest(String data,String path,String &response){
   Serial.println("in invio ...");
   Serial.println(data);
   httpClient.beginRequest();
+  httpClient.post(path);
   httpClient.sendHeader("Content-Type", contentType);
   httpClient.sendHeader("Content-Length", data.length());
-  httpClient.post(path, contentType, data);
+ // httpClient.post("/device/subscribe", contentType, data);
   httpClient.beginBody();
   httpClient.print(data);
   httpClient.endRequest();
   int statusCode = httpClient.responseStatusCode();
   Serial.println(String(statusCode));
 
-/*int successo = 200;
-  int badreq = 400;
-  int notfound = 404;
-  int mostramsg = 500;*/
   // 200 (ricev success) 400 (bad request) 404 (not found) 500 (Mostrare messaggio ricevuto)
   if(statusCode == 200){
     Serial.println("Success 200");
@@ -245,11 +247,6 @@ int postRequest(String data,String path,String &response){
   } else if(statusCode == 404){
     Serial.println("Non Trovato, Errore 404");
   } else if(statusCode == 500){
-    /* String response = httpClient.responseBody();
-    StaticJsonDocument<200> obj;
-    deserializeJson(obj, response);
-    serializeJson(obj["payload"], Serial);
-    Serial.println("Errore 500");*/
   }
   return statusCode;
 }
@@ -290,4 +287,5 @@ void createJsonObj(String &allObjJson,unsigned int board) {
     fuoco->getJsonMetadata(sensors.createNestedObject());
   }
   serializeJson(root, allObjJson);
+  
 }

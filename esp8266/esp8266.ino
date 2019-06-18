@@ -22,7 +22,7 @@ IPAddress ip(149, 132, 182, 49);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress dns(149, 132, 2, 3);
 IPAddress gateway(149, 132, 182, 1);
-const char *mqttserver ="149.132.182.121";
+const char *mqttserver ="149.132.182.203";
 ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);
  
 //CASA
@@ -33,11 +33,10 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress gateway(192,168,1,1);
 const char *mqttserver ="192.168.1.102";
 ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);*/
-unsigned long aliveFrequency = 6000; //6 secondi
+unsigned long aliveFrequency = 30000;
 unsigned long lastAliveSignal;
-///sensors/values/create
-//String webServerAddress="149.132.182.172:8080";
-String webServerAddress="149.132.182.121:3000";
+String webServerAddress="149.132.182.203:8080";
+//String webServerAddress="149.132.182.121:3000";
 MQTTInterface *mqtt = new ESP8266MQTT(mqttserver,1883);
 Tilt_sensor *tilt = new Tilt_sensor(D2,1,50);
 Heartbeat_sensor *heartbeat= new Heartbeat_sensor(A0,144,3000);
@@ -130,7 +129,8 @@ void loop() {
         float valorevibrazione = vibration->campiona();
         String svib;
         StaticJsonDocument<300> doc;
-        doc["sensorName"]="Vibrazione";
+        doc["deviceId"]=boardId;
+        doc["sensorId"] = vibration->sensorId;
         doc["value"] = valorevibrazione;
         vibration->setUltimoCampionamento(current);
         
@@ -145,19 +145,21 @@ void loop() {
           if(oldvalue_vibrazione != valorevibrazione){
               doc["isAlert"] = false;
               serializeJson(doc,svib);
+              Serial.println("dati vibrazione");
               mqtt->publish("dati",svib.c_str());
               oldvalue_vibrazione = valorevibrazione;
           }  
         }
-        Serial.print("Vibrazione: ");
-        Serial.println(valorevibrazione);
+        //Serial.print("Vibrazione: ");
+        //Serial.println(valorevibrazione);
       }
       //Heartbeat
       if(heartbeat->canSense(current)){
          float valoreheart = heartbeat->campiona();
          String scuore;
          StaticJsonDocument<300> doc;
-         doc["sensorName"]="Heartbeat";
+         doc["deviceId"]=boardId;
+         doc["sensorId"] = heartbeat->sensorId;
          doc["value"] = valoreheart;
          heartbeat->setUltimoCampionamento(current);
           if(heartbeat->isAlert()){
@@ -171,18 +173,20 @@ void loop() {
             if(oldvalue_heart != valoreheart){
                 doc["isAlert"] = false;
                 serializeJson(doc,scuore);
+                Serial.println("dati cuore");
                 mqtt->publish("dati", scuore.c_str());
                 oldvalue_heart = valoreheart;
             }  
           }
-         Serial.println(valoreheart);
+         //Serial.println(valoreheart);
       }
       //Tilt
       if(tilt->canSense(current)){
           float valoretilt = tilt->campiona();
           String stilt;
           StaticJsonDocument<300> doc;
-          doc["sensorName"]="Tilt";
+          doc["deviceId"]=boardId;
+          doc["sensorId"] = tilt->sensorId;
           doc["value"] = valoretilt;
           serializeJson(doc,stilt);
           tilt->setUltimoCampionamento(current);
@@ -196,12 +200,13 @@ void loop() {
             if(oldvalue_tilt != valoretilt){
               doc["isAlert"] = false;
               serializeJson(doc,stilt);
+              Serial.println("dati tilt");
               mqtt->publish("dati", stilt.c_str());
               oldvalue_tilt = valoretilt;
             }  
           }
-          Serial.print("Tilt: ");
-            Serial.println(valoretilt);
+          //Serial.print("Tilt: ");
+            //Serial.println(valoretilt);
       }
      }
     }

@@ -8,7 +8,6 @@ class Sensor {
         float value;
         unsigned long ultimocampionamento;
         unsigned long frequenzacampionamento;
-        String sensorId;
         String sensorName;
         String description;
         String uom;
@@ -16,6 +15,7 @@ class Sensor {
         boolean isDigital;
         String url;
     public: 
+        String sensorId;
         unsigned int soglieSuccessive;
         int maxSoglieSuccessive;
     public:
@@ -142,6 +142,5 @@ void Sensor::getJsonMetadata(const JsonObject &object){
   object["uom"]=this->uom;
   object["typeValue"]=this->typeValue;
   object["isDigital"]=this->isDigital;
-  object["url"]=this->url;
 }
 #endif

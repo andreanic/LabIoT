@@ -38,7 +38,7 @@ class Sensor {
         String toString(String msg, int value,String unitamisura);
         void setSoglieSuccessive(float value,float soglia);
         boolean isAlert();
-        String getJson();
+        String getJson(int deviceId);
         void getJsonMetadata(const JsonObject &object);
 };
 
@@ -134,8 +134,9 @@ boolean Sensor::isAlert(){
     return this->soglieSuccessive >= maxSoglieSuccessive;
 }
 
-String Sensor::getJson(){
+String Sensor::getJson(int deviceId){
   DynamicJsonDocument doc(1024);
+  doc["deviceId"]= deviceId;
   doc["sensorId"] = this->sensorId;
   doc["value"] = this->value;
   doc["isAlert"]=this->isAlert();
@@ -152,7 +153,7 @@ void Sensor::getJsonMetadata(const JsonObject &object){
   object["uom"]=this->uom;
   object["typeValue"]=this->typeValue;
   object["isDigital"]=this->isDigital;
-  object["url"]=this->url;
+  //object["url"]=this->url;
 }
 
 #endif
