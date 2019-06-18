@@ -26,6 +26,12 @@ public class Device implements Serializable {
 
 	@Column(name="last_update")
 	private Timestamp lastUpdate;
+	
+	private Timestamp registered;
+	
+	private String description;
+	
+	private Boolean enabled;
 
 	//bi-directional many-to-one association to DeviceSensor
 	@OneToMany(mappedBy="subscriber")
@@ -106,4 +112,29 @@ public class Device implements Serializable {
 		return sensorValue;
 	}
 
+	public Timestamp getRegistered() {
+		return registered;
+	}
+
+	public void setRegistered(Timestamp registered) {
+		this.registered = registered;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	
 }

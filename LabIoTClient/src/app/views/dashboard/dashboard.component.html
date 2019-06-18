@@ -1,47 +1,132 @@
-<div class="container">
   <div class="row justify-content-center">
+    <div class="alert alert-danger alert-message" role="alert" style="z-index: 100;" *ngIf="errorMessage">
+      <h5>Error!</h5>  
+      <p>{{errorMessage}}</p>
+    </div>
+    <div class="alert success alert-success alert-message" role="alert" style="z-index: 100;" *ngIf="successMessage">
+      <h5>Success!</h5>  
+      <p>{{successMessage}}</p>
+    </div>
     <div class="col-4">
       <h2>Sensor Values</h2>
       <ul class="list-group">
-        <button class="list-group-item list-group-item-action" *ngFor="let sensorValue of sensorValues" [class.alert]="sensorValue.isAlert"
-        (click)="showMore(sensorValue)">
-          {{sensorValue.sensorName}}: {{sensorValue.value}}
+        <button class="list-group-item list-group-item-action" (click)="getAllDevices()">
+          Devices
+        </button>
+        <button class="list-group-item list-group-item-action" (click)="getAllSensors()">
+          Sensors
+        </button>
+        <button class="list-group-item list-group-item-action" (click)="getLastValues()">
+          Last Values
         </button>
       </ul>
     </div>
+
+    <!-- Liste Devices, Sensors e Last Values -->
+    <div class="col-4"  [ngSwitch]="selectedCategory">
+      <div *ngSwitchCase="DEVICES" >
+        <h2>Devices Available</h2>
+        <ul class="list-group" class="overflow-auto" style="height: 148px;padding-inline-start: 0px;">
+            <button class="list-group-item list-group-item-action"  *ngFor="let device of devices" (click)="getDeviceSensors(device)">
+              {{device.deviceName}} ({{device.deviceId}})
+            </button>
+          </ul>
+      </div>
+      <div *ngSwitchCase="SENSORS" >
+        <h2>Sensors Available</h2>
+        <ul class="list-group" class="overflow-auto" style="height: 148px;padding-inline-start: 0px;">
+            <button class="list-group-item list-group-item-action" *ngFor="let sensor of sensors" (click)="getSensorDevices(sensor)">
+              {{sensor.sensorId}} ({{sensor.sensorName}})
+            </button>
+          </ul>
+      </div>
+      <div *ngSwitchCase="VALUES">
+        <h2>Sensors Last Value</h2>
+        <ul class="list-group" class="overflow-auto" style="height: 148px;padding-inline-start: 0px;">
+          <button class="list-group-item list-group-item-action" *ngFor="let sensorValue of sensorValues" [class.alert]="sensorValue.isAlert"
+          (click)="getLast20Values(sensorValue)">
+            {{sensorValue.sensorName}}: {{sensorValue.value}}
+          </button>
+        </ul>
+      </div>
+    </div>
   </div>
-  <div class="row justify-content-center mt-3">
-    <div class="col-4">
-      <div class="row">
-        <div class="col">
-          <button type="button" class="col btn btn-success" [disabled]="!isStopped" (click)="startMonitoring()">Start</button>
+
+  <!-- Liste Sensors X Device e Devices X Sensor -->
+  <div class="row justify-content-center">
+    <div class="card" [ngSwitch]="selectedSubCategory" *ngIf="selectedSubCategory" style="width: 64em;">
+      <div class="card-body" *ngSwitchCase="SENSORSXDEVICE">
+        <div class="row">
+          <h2 class="col-4 card-title">{{deviceSensors.device.deviceName}}</h2>
+          <div class="col-4">
+            <button class="btn btn-success col" [disabled]="deviceSensors.device.enabled" (click)="startMonitoring(deviceSensors.device)">Start</button>
+          </div>
+          <div class="col-4">
+            <button class="btn btn-danger col" [disabled]="!deviceSensors.device.enabled" (click)="stopMonitoring(deviceSensors.device)">Stop</button>
+          </div>
         </div>
-        <div class="col">
-          <button type="button" class="col btn btn-danger" [disabled]="isStopped" (click)="stopMonitoring()">Stop</button>
+        <div class="row">
+          <div class="col-4">
+              <h5>Device ID:</h5>
+              <p>{{deviceSensors.device.deviceId}}</p>
+              <h5>Description:</h5>
+              <p>{{deviceSensors.device.description}}</p>
+              <h5>Registered:</h5>
+              <p>{{deviceSensors.device.registered}}</p>
+              <h5>Last Update:</h5>
+              <p>{{deviceSensors.device.lastUpdate}}</p>
+          </div>
+          <div class="col-4">
+            <h5>Sensors Available</h5>
+            <ul class="list-group" class="overflow-auto" style="height: 148px;padding-inline-start: 0px;">
+              <button class="list-group-item list-group-item-action"  *ngFor="let sensor of deviceSensors.sensors" (click)="getLast20ValuesByDeviceAndSensorID(sensor.sensorId,deviceSensors.device.deviceId)">
+                {{sensor.sensorId}} ({{sensor.sensorName}})
+              </button>
+            </ul>
+          </div>
+          <div class="col-4" *ngIf="specificSensorValues">
+            <h5>Last values</h5>
+            <ul class="list-group" class="overflow-auto" style="height: 148px;padding-inline-start: 0px;">
+              <button class="list-group-item list-group-item-action"  *ngFor="let sensor of specificSensorValues">
+                {{sensor.value}}
+              </button>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body" *ngSwitchCase="DEVICESXSENSOR">
+        <div class="row">
+          <h2 class="col-4 card-title">{{sensorDevices.sensor.sensorName}}</h2>
+        </div>
+        <div class="row">
+          <div class="col-4">
+              <h5>Sensor ID:</h5>
+              <p>{{sensorDevices.sensor.sensorId}}</p>
+              <h5>Description:</h5>
+              <p>{{sensorDevices.sensor.description}}</p>
+              <h5>Unity of measure:</h5>
+              <p>{{sensorDevices.sensor.uom}}</p>
+              <h5>More info:</h5>
+              <a href="http://{{sensorDevices.sensor.url}}">{{sensorDevices.sensor.url}}</a>
+          </div>
+          <div class="col-4">
+            <h5>Running Device</h5>
+            <ul class="list-group" class="overflow-auto" style="height: 148px;padding-inline-start: 0px;">
+              <button class="list-group-item list-group-item-action"  *ngFor="let device of sensorDevices.devices" (click)="getLast20ValuesByDeviceAndSensorID(sensorDevices.sensor.sensorId,device.deviceId)">
+                {{device.deviceName}} ({{device.deviceId}})
+              </button>
+            </ul>
+          </div>
+          <div class="col-4" *ngIf="specificSensorValues">
+            <h5>Last values</h5>
+            <ul class="list-group" class="overflow-auto" style="height: 148px;padding-inline-start: 0px;">
+              <button class="list-group-item list-group-item-action"  *ngFor="let sensor of specificSensorValues">
+                {{sensor.value}}
+              </button>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
-  </div>  
-
-  <div class="row justify-content-center mt-5" *ngIf="specificSensorValues">
-    <div class="col-4">
-      <p class="font-weight-bold">{{tableTitle}}</p>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Valore</th>
-            <th scope="col">Orario</th>
-            <th scope="col">Alert</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let sensorValue of specificSensorValues">
-            <td>{{sensorValue.value}}</td>
-            <td>{{sensorValue.dataInserimento}}</td>
-            <td>{{sensorValue.isAlert ? "Si" : "No"}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
-</div>

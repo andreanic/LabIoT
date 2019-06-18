@@ -13,6 +13,9 @@ public class DeviceToDTO {
 		dto.setDeviceName(device.getDeviceName());
 		dto.setDeviceId(device.getId());
 		dto.setLastUpdate(device.getLastUpdate());
+		dto.setRegistered(device.getRegistered());
+		dto.setDescription(device.getDescription());
+		dto.setEnabled(device.getEnabled());
 		
 		return dto;
 	}

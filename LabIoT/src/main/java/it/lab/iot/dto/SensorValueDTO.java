@@ -1,3 +1,4 @@
+
 package it.lab.iot.dto;
 
 import java.util.Date;

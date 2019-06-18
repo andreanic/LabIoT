@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { SensorRepository } from '../repository/sensor-repository/sensor-repository.service';
 import { BrowserModule } from '@angular/platform-browser';
+import { DeviceRepositoryService } from '../repository/device-repository/device-repository.service';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { BrowserModule } from '@angular/platform-browser';
   declarations: [
   ],
   providers: [
-    SensorRepository
+    SensorRepository,
+    DeviceRepositoryService
   ],
   exports: [
     FormsModule,

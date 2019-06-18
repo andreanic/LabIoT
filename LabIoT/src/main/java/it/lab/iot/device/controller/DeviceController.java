@@ -87,7 +87,41 @@ public class DeviceController extends ExceptionHandlerController{
 		}
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("rawtypes")
+	@POST
+	@RequestMapping("/start")
+	@ResponseBody
+	@Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+	public ResponseEntity<ApiBaseResponse> startMonitoring(HttpServletRequest request, @RequestBody DeviceDTO device) throws AppException {
+		try {
+			logger.info(request.getRequestURI());
+			String response = deviceService.startStopMonitoring(device, deviceService.START);
+			ApiBaseResponse<String> abr = new ApiBaseResponse<String>(request.getRequestURI(),response);
+	        return new ResponseEntity<ApiBaseResponse>(abr,HttpStatus.OK);
+		} catch (BaseException e) {
+			throw new AppException(e);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@POST
+	@RequestMapping("/stop")
+	@ResponseBody
+	@Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+	public ResponseEntity<ApiBaseResponse> stopMonitoring(HttpServletRequest request, @RequestBody DeviceDTO device) throws AppException {
+		try {
+			logger.info(request.getRequestURI());
+			String response = deviceService.startStopMonitoring(device, deviceService.STOP);
+			ApiBaseResponse<String> abr = new ApiBaseResponse<String>(request.getRequestURI(),response);
+	        return new ResponseEntity<ApiBaseResponse>(abr,HttpStatus.OK);
+		} catch (BaseException e) {
+			throw new AppException(e);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
 	@DELETE
 	@RequestMapping("{deviceId}/delete")
 	@ResponseBody
@@ -95,8 +129,8 @@ public class DeviceController extends ExceptionHandlerController{
 	public ResponseEntity<ApiBaseResponse> deleteOldValue(HttpServletRequest request, @PathVariable("deviceId") Integer deviceId) throws AppException {
 		try {
 			logger.info(request.getRequestURI());
-			deviceService.deleteSubscribedDevice(deviceId);
-			ApiBaseResponse abp = new ApiBaseResponse(request.getRequestURI(),null);
+			String response = deviceService.deleteSubscribedDevice(deviceId);
+			ApiBaseResponse<String> abp = new ApiBaseResponse<String>(request.getRequestURI(),response);
 	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
 		} catch (BaseException e) {
 			throw new AppException(e);

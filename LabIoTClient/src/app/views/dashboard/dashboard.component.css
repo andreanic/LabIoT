@@ -1,3 +1,19 @@
 .alert {
-    background-color: crimson;
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-message {
+    z-index: 100;
+    width: 250px;
+    margin-left: calc(100vw - 59vw);
+    margin-top: 5px;
+    position: fixed;
 }

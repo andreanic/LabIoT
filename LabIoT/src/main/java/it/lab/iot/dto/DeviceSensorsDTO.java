@@ -8,7 +8,6 @@ import lombok.Data;
 
 @Data
 public class DeviceSensorsDTO {
-	@JsonProperty(required = true)
 	private DeviceDTO device;
 	private List<SensorDTO> sensors;
 }

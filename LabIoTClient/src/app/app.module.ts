@@ -4,7 +4,9 @@ import { NgModule } from '@angular/core';
 import {AppRoutingModule} from './app.routing';
 import { AppComponent } from './app.component';
 import { SharedModule } from './module/shared-module';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+ 
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -13,7 +15,9 @@ import { SharedModule } from './module/shared-module';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    SharedModule
+    SharedModule,
+    BrowserAnimationsModule,
+    ToastrModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]

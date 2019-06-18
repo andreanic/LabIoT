@@ -14,6 +14,10 @@ public class DeviceDTO {
 	@JsonProperty(required = true)
 	private String deviceName;
 	private Integer deviceId;
+	private String description;
+	private Boolean enabled;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
 	private Date lastUpdate;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+	private Date registered;
 }

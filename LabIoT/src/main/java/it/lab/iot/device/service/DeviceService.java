@@ -1,15 +1,18 @@
 package it.lab.iot.device.service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.lab.iot.device.exception.InvalidDeviceIdException;
+import it.lab.iot.device.exception.InvalidStartStopTypeException;
 import it.lab.iot.device.exception.NoDeviceFoundException;
 import it.lab.iot.device.exception.SubscribeInputEmptyException;
 import it.lab.iot.device.mapper.DeviceDTOToDevice;
@@ -21,6 +24,7 @@ import it.lab.iot.dto.DeviceDTO;
 import it.lab.iot.dto.DeviceSensorsDTO;
 import it.lab.iot.dto.SensorDTO;
 import it.lab.iot.exception.BaseException;
+import it.lab.iot.mqtt.service.IMqttService;
 import it.lab.iot.sensor.entity.Device;
 import it.lab.iot.sensor.entity.DeviceSensor;
 import it.lab.iot.sensor.entity.Sensor;
@@ -34,12 +38,19 @@ public class DeviceService implements IDeviceService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
 	
+	private static final String DELETE_DEVICE_OK = "Device rimosso con successo dal sistema";
+	private static final String DEVICE_STOP_OK = "Messaggio di stop inviato con successo";
+	private static final String DEVICE_START_OK = "Messaggio di start inviato con successo";
+	
 	@Autowired
 	private IDeviceRepository deviceRepository;
 	@Autowired
 	private ISensorRepository sensorRepository;
 	@Autowired
 	private IDeviceSensorRepository deviceSensorRepository;
+	
+	@Autowired
+	private IMqttService mqttService;
 	
 	@Override
 	public List<DeviceDTO> getAllDeviceAvailable() throws BaseException {		
@@ -130,7 +141,7 @@ public class DeviceService implements IDeviceService {
 	}
 
 	@Override
-	public void deleteSubscribedDevice(Integer deviceId) throws BaseException {
+	public String deleteSubscribedDevice(Integer deviceId) throws BaseException {
 		if(deviceId == null) throw new InvalidDeviceIdException();
 		
 		Optional<Device> device = deviceRepository.findById(deviceId);
@@ -138,7 +149,43 @@ public class DeviceService implements IDeviceService {
 		if(!device.isPresent()) throw new NoDeviceFoundException();
 		
 		deviceRepository.delete(device.get());
+				
+		return DELETE_DEVICE_OK;
 		
+	}
+
+	@Override
+	public String startStopMonitoring(DeviceDTO deviceDTO, String type) throws BaseException {
+		if(deviceDTO.getDeviceId() == null) throw new InvalidDeviceIdException();
+		
+		Optional<Device> opt = deviceRepository.findById(deviceDTO.getDeviceId());
+		
+		if(!opt.isPresent()) throw new NoDeviceFoundException();
+		
+		Device device = opt.get();
+		
+		MqttMessage msg = new MqttMessage();
+		msg.setPayload(deviceDTO.getDeviceId().toString().getBytes());
+		
+		if(START.equals(type)) {
+			mqttService.sendMessage(msg, START);
+			
+			device.setEnabled(Boolean.TRUE);
+			deviceRepository.save(device);
+			
+			return DEVICE_START_OK;
+		}
+		else if(STOP.equals(type)) {
+			mqttService.sendMessage(msg, STOP);
+			
+			device.setEnabled(Boolean.FALSE);
+			deviceRepository.save(device);
+			
+			return DEVICE_STOP_OK;
+		}
+		else {
+			throw new InvalidStartStopTypeException();
+		}		
 	}
 
 }
