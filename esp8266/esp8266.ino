@@ -36,8 +36,8 @@ ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);*/
 unsigned long aliveFrequency = 6000; //6 secondi
 unsigned long lastAliveSignal;
 ///sensors/values/create
-String webServerAddress="149.132.182.172:8080";
-//String webServerAddress="149.132.182.121:3000";
+//String webServerAddress="149.132.182.172:8080";
+String webServerAddress="149.132.182.121:3000";
 MQTTInterface *mqtt = new ESP8266MQTT(mqttserver,1883);
 Tilt_sensor *tilt = new Tilt_sensor(D2,1,50);
 Heartbeat_sensor *heartbeat= new Heartbeat_sensor(A0,144,3000);
@@ -56,6 +56,7 @@ const unsigned long heartbeatFrequency=600000;
 unsigned long lastHeartBeat;
 WiFiClient client;
 HTTPClient http;
+bool enabled=true;
     
 void setup() {
   Serial.begin(9600);
@@ -91,118 +92,120 @@ void loop() {
       mqtt->subscribe("stop",1);
   }
   mqtt->loop();
-  unsigned long currentAlive = millis();
-  if(currentAlive - lastAliveSignal  >= aliveFrequency || boardId == 0){
-    String allObjJson; 
-    createJsonObj(allObjJson,boardId);
-    //String request = "http://"+webServerAddress+"/testPost";
-    String request = "http://"+webServerAddress+"/device/subscribe";
-    int httpCode;
-    String payload;
-    httpPost(request,allObjJson,httpCode, payload);
-    if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
-      boardId = getDeviceIdFromHttp(payload);  
-    }
-    lastAliveSignal = currentAlive;
-    Serial.println("Id board:" + String(boardId));
-  }
-  
-  
-  if(button->isPressed()){
-      led->activate(LOW);
-      ledHelp->activate(LOW);
-      Serial.println("Conferma di presenza dell'infermiere");
-   }
-
-   if(buttonHelp->isPressed()){
-      ledHelp->activate(HIGH); 
-      mqtt->publish("aiuto", "Help aiutami");
-      Serial.println("Richiesta di aiuto inviata");
-   }
-
-  //SENSORI
-  long current = millis();
-   //Vibrazione
-   if(boardId != 0) {
-   /*if(vibration->canSense(current)){
-      float valorevibrazione = vibration->campiona();
-      String svib;
-      StaticJsonDocument<300> doc;
-      doc["sensorName"]="Vibrazione";
-      doc["value"] = valorevibrazione;
-      vibration->setUltimoCampionamento(current);
-      
-      if(vibration->isAlert()){
-        doc["isAlert"] = true;
-        serializeJson(doc,svib);
-        Serial.println("alert vibrazione");
-        mqtt->publish("alert", svib.c_str());
+  if(enabled == true){
+      unsigned long currentAlive = millis();
+    if(currentAlive - lastAliveSignal  >= aliveFrequency || boardId == 0){
+      String allObjJson; 
+      createJsonObj(allObjJson,boardId);
+      //String request = "http://"+webServerAddress+"/testPost";
+      String request = "http://"+webServerAddress+"/device/subscribe";
+      int httpCode;
+      String payload;
+      httpPost(request,allObjJson,httpCode, payload);
+      if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
+        boardId = getDeviceIdFromHttp(payload);  
       }
-      else { 
-        //altrimenti solo se il valore è diverso da quello precedente invia tramite mqtt
-        if(oldvalue_vibrazione != valorevibrazione){
-            doc["isAlert"] = false;
-            serializeJson(doc,svib);
-            mqtt->publish("dati",svib.c_str());
-            oldvalue_vibrazione = valorevibrazione;
-        }  
-      }
-      Serial.print("Vibrazione: ");
-      Serial.println(valorevibrazione);
+      lastAliveSignal = currentAlive;
+      Serial.println("Id board:" + String(boardId));
     }
-    //Heartbeat
-    if(heartbeat->canSense(current)){
-       float valoreheart = heartbeat->campiona();
-       String scuore;
-       StaticJsonDocument<300> doc;
-       doc["sensorName"]="Heartbeat";
-       doc["value"] = valoreheart;
-       heartbeat->setUltimoCampionamento(current);
-        if(heartbeat->isAlert()){
-          doc["isAlert"] = true;
-          serializeJson(doc,scuore);
-          Serial.println("Alert cuore");
-          mqtt->publish("alert", scuore.c_str());
-        }
-        else {
-          //solo se il valore è diverso da quello precedente invia tramite mqtt
-          if(oldvalue_heart != valoreheart){
-              doc["isAlert"] = false;
-              serializeJson(doc,scuore);
-              mqtt->publish("dati", scuore.c_str());
-              oldvalue_heart = valoreheart;
-          }  
-        }
-       Serial.println(valoreheart);
-    }
-    //Tilt
-    if(tilt->canSense(current)){
-        float valoretilt = tilt->campiona();
-        String stilt;
+    
+    
+    if(button->isPressed()){
+        led->activate(LOW);
+        ledHelp->activate(LOW);
+        Serial.println("Conferma di presenza dell'infermiere");
+     }
+  
+     if(buttonHelp->isPressed()){
+        ledHelp->activate(HIGH); 
+        mqtt->publish("aiuto", "Help aiutami");
+        Serial.println("Richiesta di aiuto inviata");
+     }
+  
+    //SENSORI
+    long current = millis();
+     if(boardId != 0) {
+      Serial.println("Board " + String(boardId));
+     if(vibration->canSense(current)){
+        float valorevibrazione = vibration->campiona();
+        String svib;
         StaticJsonDocument<300> doc;
-        doc["sensorName"]="Tilt";
-        doc["value"] = valoretilt;
-        serializeJson(doc,stilt);
-        tilt->setUltimoCampionamento(current);
-        if(tilt->isAlert()){
+        doc["sensorName"]="Vibrazione";
+        doc["value"] = valorevibrazione;
+        vibration->setUltimoCampionamento(current);
+        
+        if(vibration->isAlert()){
           doc["isAlert"] = true;
-          serializeJson(doc,stilt);
-          Serial.println("Alert tilt");
-          mqtt->publish("alert", stilt.c_str());
+          serializeJson(doc,svib);
+          Serial.println("alert vibrazione");
+          mqtt->publish("alert", svib.c_str());
         }
-        else {
-          if(oldvalue_tilt != valoretilt){
-            doc["isAlert"] = false;
-            serializeJson(doc,stilt);
-            mqtt->publish("dati", stilt.c_str());
-            oldvalue_tilt = valoretilt;
+        else { 
+          //altrimenti solo se il valore è diverso da quello precedente invia tramite mqtt
+          if(oldvalue_vibrazione != valorevibrazione){
+              doc["isAlert"] = false;
+              serializeJson(doc,svib);
+              mqtt->publish("dati",svib.c_str());
+              oldvalue_vibrazione = valorevibrazione;
           }  
         }
-        Serial.print("Tilt: ");
-          Serial.println(valoretilt);
-    }*/
-   }
-    //delay(5000);
+        Serial.print("Vibrazione: ");
+        Serial.println(valorevibrazione);
+      }
+      //Heartbeat
+      if(heartbeat->canSense(current)){
+         float valoreheart = heartbeat->campiona();
+         String scuore;
+         StaticJsonDocument<300> doc;
+         doc["sensorName"]="Heartbeat";
+         doc["value"] = valoreheart;
+         heartbeat->setUltimoCampionamento(current);
+          if(heartbeat->isAlert()){
+            doc["isAlert"] = true;
+            serializeJson(doc,scuore);
+            Serial.println("Alert cuore");
+            mqtt->publish("alert", scuore.c_str());
+          }
+          else {
+            //solo se il valore è diverso da quello precedente invia tramite mqtt
+            if(oldvalue_heart != valoreheart){
+                doc["isAlert"] = false;
+                serializeJson(doc,scuore);
+                mqtt->publish("dati", scuore.c_str());
+                oldvalue_heart = valoreheart;
+            }  
+          }
+         Serial.println(valoreheart);
+      }
+      //Tilt
+      if(tilt->canSense(current)){
+          float valoretilt = tilt->campiona();
+          String stilt;
+          StaticJsonDocument<300> doc;
+          doc["sensorName"]="Tilt";
+          doc["value"] = valoretilt;
+          serializeJson(doc,stilt);
+          tilt->setUltimoCampionamento(current);
+          if(tilt->isAlert()){
+            doc["isAlert"] = true;
+            serializeJson(doc,stilt);
+            Serial.println("Alert tilt");
+            mqtt->publish("alert", stilt.c_str());
+          }
+          else {
+            if(oldvalue_tilt != valoretilt){
+              doc["isAlert"] = false;
+              serializeJson(doc,stilt);
+              mqtt->publish("dati", stilt.c_str());
+              oldvalue_tilt = valoretilt;
+            }  
+          }
+          Serial.print("Tilt: ");
+            Serial.println(valoretilt);
+      }
+     }
+    }
+  delay(2000);
 }
 /*
 {
@@ -225,32 +228,30 @@ void createJsonObj(String &allObjJson,unsigned int board) {
   if(board != 0){
     device["deviceId"]=board;  
   }
-  JsonArray sensors = root.createNestedArray("sensors");
-  heartbeat->getJsonMetadata(sensors.createNestedObject());
-  tilt->getJsonMetadata(sensors.createNestedObject());
-  vibration->getJsonMetadata(sensors.createNestedObject());
-  serializeJson(root, allObjJson);
+  else {
+    JsonArray sensors = root.createNestedArray("sensors");
+    heartbeat->getJsonMetadata(sensors.createNestedObject());
+    tilt->getJsonMetadata(sensors.createNestedObject());
+    vibration->getJsonMetadata(sensors.createNestedObject());
+  }
+  serializeJson(root, allObjJson);  
 }
 
-//convertire payload in intero per domani
 void callback(char* topic, byte* payload, unsigned int length){
-  String msg;
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-    msg + (char)payload[i];
+  String msgPayload = String((char *)payload);
+  payload[length] = '\0'; 
+  int pwmVal = atoi((char *)payload);
+  if(String(topic) == "start") {
+    if(String(boardId) == String(pwmVal)) {
+        Serial.println("Attivato");
+        enabled = true;
+    }
   }
-  int board = msg.toInt();
-  Serial.println("Boardino " + msg);
-  if(topic == "start") {
-        int Int32 = 0;
-        Int32 = (Int32 << 8) + payload[3];
-        Int32 = (Int32 << 8) + payload[2];
-        Int32 = (Int32 << 8) + payload[1];
-        Int32 = (Int32 << 8) + payload[0];
-        Serial.println("interino" + String(Int32));
-  }
-  else if(topic == "stop"){
-  
+  else if(String(topic)=="stop"){
+    if(String(boardId) == String(pwmVal)){
+        enabled = false;
+        Serial.println("Disabilitato");
+      }
   }
   else {
     Serial.print("Message arrived [");
@@ -262,7 +263,6 @@ void callback(char* topic, byte* payload, unsigned int length){
     Serial.println();
     //led->activate(HIGH);  
   }
-  
 }
 void httpPost(const String requestUrl, const String &data,int &httpCode, String &payloadRequest){
     Serial.println("Indirizzo " + requestUrl);
@@ -291,7 +291,6 @@ unsigned int getDeviceIdFromHttp(const String &payloadRequest) {
       Serial.println(err.c_str());
     }
     JsonObject obj = doc.as<JsonObject>();
-    //ottiene il campo deviceId da payload
     if (obj.containsKey("payload")) {
         JsonObject payload = obj["payload"];
         String deviceId;
