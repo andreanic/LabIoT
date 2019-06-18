@@ -12,7 +12,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
-
+#include <sstream>
 ESP8266WiFiMulti WiFiMulti;
 
 //LAB
@@ -33,11 +33,11 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress gateway(192,168,1,1);
 const char *mqttserver ="192.168.1.102";
 ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);*/
-
-
-
-//String webServerAddress="149.132.182.203:8080";
-String webServerAddress="149.132.182.121:3000";
+unsigned long aliveFrequency = 6000; //6 secondi
+unsigned long lastAliveSignal;
+///sensors/values/create
+String webServerAddress="149.132.182.172:8080";
+//String webServerAddress="149.132.182.121:3000";
 MQTTInterface *mqtt = new ESP8266MQTT(mqttserver,1883);
 Tilt_sensor *tilt = new Tilt_sensor(D2,1,50);
 Heartbeat_sensor *heartbeat= new Heartbeat_sensor(A0,144,3000);
@@ -52,18 +52,32 @@ Button_simple *button = new Button_simple(D3);
 Button_simple *buttonHelp = new Button_simple(D7);
 
 unsigned int boardId=0;
+const unsigned long heartbeatFrequency=600000;
+unsigned long lastHeartBeat;
 WiFiClient client;
 HTTPClient http;
     
 void setup() {
   Serial.begin(9600);
   while(!Serial){}
+  ESP8266Wifi.connect();
   mqtt->setCallback(callback);
-  String allObjJson; 
-  createJsonObj(allObjJson,boardId);
-  String request = "http://"+webServerAddress+"/testPost";
-  httpPost(request,allObjJson,boardId);
-  Serial.println(allObjJson);
+  unsigned long current = millis();
+  if(current - lastAliveSignal  >= aliveFrequency || boardId == 0){
+    String allObjJson; 
+    createJsonObj(allObjJson,boardId);
+    //String request = "http://"+webServerAddress+"/testPost";
+    String request = "http://"+webServerAddress+"/device/subscribe";
+    int httpCode;
+    String payload;
+    httpPost(request,allObjJson,httpCode,payload);
+    if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
+      boardId = getDeviceIdFromHttp(payload);  
+    }
+    lastAliveSignal=current;
+    Serial.println("Id board:" + String(boardId));  
+  }
+  
 }
 
 void loop() {
@@ -72,15 +86,29 @@ void loop() {
   }
   if (!mqtt->isConnected()) {
       mqtt->reconnect();
-      mqtt->subscribe("Help");
+      mqtt->subscribe("Help",1);
+      mqtt->subscribe("start",1);
+      mqtt->subscribe("stop",1);
   }
   mqtt->loop();
-  String allObjJson; 
-  createJsonObj(allObjJson,boardId);
-  String request = "http://"+webServerAddress+"/testPost";
-  httpPost(request,allObjJson,boardId);
-  delay(5000);
-  /*if(button->isPressed()){
+  unsigned long currentAlive = millis();
+  if(currentAlive - lastAliveSignal  >= aliveFrequency || boardId == 0){
+    String allObjJson; 
+    createJsonObj(allObjJson,boardId);
+    //String request = "http://"+webServerAddress+"/testPost";
+    String request = "http://"+webServerAddress+"/device/subscribe";
+    int httpCode;
+    String payload;
+    httpPost(request,allObjJson,httpCode, payload);
+    if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
+      boardId = getDeviceIdFromHttp(payload);  
+    }
+    lastAliveSignal = currentAlive;
+    Serial.println("Id board:" + String(boardId));
+  }
+  
+  
+  if(button->isPressed()){
       led->activate(LOW);
       ledHelp->activate(LOW);
       Serial.println("Conferma di presenza dell'infermiere");
@@ -90,12 +118,13 @@ void loop() {
       ledHelp->activate(HIGH); 
       mqtt->publish("aiuto", "Help aiutami");
       Serial.println("Richiesta di aiuto inviata");
-   }*/
+   }
 
   //SENSORI
-  /*long current = millis();
+  long current = millis();
    //Vibrazione
-   if(vibration->canSense(current)){
+   if(boardId != 0) {
+   /*if(vibration->canSense(current)){
       float valorevibrazione = vibration->campiona();
       String svib;
       StaticJsonDocument<300> doc;
@@ -172,6 +201,8 @@ void loop() {
         Serial.print("Tilt: ");
           Serial.println(valoretilt);
     }*/
+   }
+    //delay(5000);
 }
 /*
 {
@@ -195,35 +226,53 @@ void createJsonObj(String &allObjJson,unsigned int board) {
     device["deviceId"]=board;  
   }
   JsonArray sensors = root.createNestedArray("sensors");
-  String heartJson = heartbeat->getJsonMetadata();
-  String tiltJson = tilt->getJsonMetadata();
-  String vibrationJson = vibration->getJsonMetadata();
-  sensors.add(heartJson);
-  sensors.add(tiltJson);
-  sensors.add(vibrationJson);
+  heartbeat->getJsonMetadata(sensors.createNestedObject());
+  tilt->getJsonMetadata(sensors.createNestedObject());
+  vibration->getJsonMetadata(sensors.createNestedObject());
   serializeJson(root, allObjJson);
 }
 
+//convertire payload in intero per domani
 void callback(char* topic, byte* payload, unsigned int length){
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
+  String msg;
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
+    msg + (char)payload[i];
   }
-  Serial.println();
-  led->activate(HIGH);
+  int board = msg.toInt();
+  Serial.println("Boardino " + msg);
+  if(topic == "start") {
+        int Int32 = 0;
+        Int32 = (Int32 << 8) + payload[3];
+        Int32 = (Int32 << 8) + payload[2];
+        Int32 = (Int32 << 8) + payload[1];
+        Int32 = (Int32 << 8) + payload[0];
+        Serial.println("interino" + String(Int32));
+  }
+  else if(topic == "stop"){
+  
+  }
+  else {
+    Serial.print("Message arrived [");
+    Serial.print(topic);
+    Serial.print("] ");
+    for (int i = 0; i < length; i++) {
+      Serial.print((char)payload[i]);
+    }
+    Serial.println();
+    //led->activate(HIGH);  
+  }
+  
 }
-void httpPost(const String requestUrl, const String &data,unsigned int boardId){
+void httpPost(const String requestUrl, const String &data,int &httpCode, String &payloadRequest){
     Serial.println("Indirizzo " + requestUrl);
     if (http.begin(client,requestUrl)) { 
       http.addHeader("Content-Type", "application/json"); 
-      int httpCode = http.POST(data);
+      httpCode = http.POST(data);
       if (httpCode > 0) {
         Serial.printf("[HTTP] POST... code: %d\n", httpCode);
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          String payload = http.getString();
-          Serial.println("payload " + payload);
+          payloadRequest = http.getString();
         }
       } else {
         Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
@@ -233,3 +282,22 @@ void httpPost(const String requestUrl, const String &data,unsigned int boardId){
       Serial.printf("[HTTP} Unable to connect\n");
     }
   }   
+  
+unsigned int getDeviceIdFromHttp(const String &payloadRequest) {
+    StaticJsonDocument<1024> doc;
+    DeserializationError err = deserializeJson(doc,payloadRequest);
+    if (err) {
+      Serial.print(F("deserializeJson() failed with code "));
+      Serial.println(err.c_str());
+    }
+    JsonObject obj = doc.as<JsonObject>();
+    //ottiene il campo deviceId da payload
+    if (obj.containsKey("payload")) {
+        JsonObject payload = obj["payload"];
+        String deviceId;
+        serializeJson(payload["deviceId"],deviceId);
+        unsigned int boardId = deviceId.toInt();
+        return boardId;
+    }
+    return 0;
+}

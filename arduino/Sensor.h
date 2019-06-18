@@ -7,12 +7,12 @@ class Sensor {
         int pin;
         float soglia;
         float value;
-// NUOVI CAMPI (Gabriele)
+        String sensorId;
         String sensorName;
         String description;
         String uom;
         String typeValue;
-        String digitOrAnal;
+        boolean isDigital;
         String url;
 
         unsigned long ultimocampionamento;
@@ -39,6 +39,7 @@ class Sensor {
         void setSoglieSuccessive(float value,float soglia);
         boolean isAlert();
         String getJson();
+        void getJsonMetadata(const JsonObject &object);
 };
 
 Sensor::Sensor(){
@@ -126,7 +127,7 @@ void Sensor::setSoglieSuccessive(float value,float soglia){
       this->soglieSuccessive=this->soglieSuccessive + 1;  
     }
     else {
-      this->soglieSuccessive =0;  
+      this->soglieSuccessive=0;  
     }
  }
 boolean Sensor::isAlert(){
@@ -135,7 +136,7 @@ boolean Sensor::isAlert(){
 
 String Sensor::getJson(){
   DynamicJsonDocument doc(1024);
-  doc["sensorName"] = this->sensorName;
+  doc["sensorId"] = this->sensorId;
   doc["value"] = this->value;
   doc["isAlert"]=this->isAlert();
   char json[1024];
@@ -144,21 +145,14 @@ String Sensor::getJson(){
   return String(json);
 }
 
-String Sensor::getJsonMetadata(){
-  DynamicJsonDocument doc(1024);
-  doc["sensorName"] = this->sensorName;
-  // aggiunti campi al json per ogni sensore  (Gabriele)
-  // descrizione, unità di misura, tipo del valore ritornato,analogico o digitale, timestamp, url pagina sensore  (Gabriele) 
-  doc["description"]=this->description;
-  doc["um"]=this->um;
-  doc["typeValue"]=this->typeValue;
-  doc["da"]=this->digitOrAnal;
-  doc["timestamp"]=this->millis();
-  doc["url"]=this->url;
-  doc["freqCamp"]=this->frequenzacampionamento;
-  char json[1024];
-  serializeJson(doc, json);
-
-  return String(json);
+void Sensor::getJsonMetadata(const JsonObject &object){
+  object["sensorId"]=this->sensorId;
+  object["sensorName"] = this->sensorName;
+  object["description"] = this->description;
+  object["uom"]=this->uom;
+  object["typeValue"]=this->typeValue;
+  object["isDigital"]=this->isDigital;
+  object["url"]=this->url;
 }
+
 #endif

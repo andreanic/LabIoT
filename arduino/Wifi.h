@@ -1,6 +1,6 @@
 #ifndef WIFIPOWER_H
 #define WIFIPOWER_H
-#include <WiFi101.h>
+//#include <WiFi101.h>
 #include "Sensor.h"
 class Wifi: public Sensor{
   public:
@@ -9,18 +9,18 @@ class Wifi: public Sensor{
     ~Wifi();
     float campiona();
     void printWifiStatus();
-    sensorName = "WiFi"
-    description="potenza del segnale del wifi";
-    uom="decibel";
-    typeValue="Float";
-    digitOrAnal="Digitale";
-    url="";
 };
 
 Wifi::Wifi():Sensor(){}
 Wifi::Wifi(unsigned long frequenzacampionamento):Sensor(){
   this->frequenzacampionamento = frequenzacampionamento;  
-  this->sensorName = "Wifipower";
+  this->sensorId = "WiFi";
+  this->sensorName = "WiFi";
+  this->description="potenza del segnale del wifi";
+  this->uom="decibel";
+  this->typeValue="Float";
+  this->isDigital=true;
+  this->url="";
 }
 
 Wifi::~Wifi(){}
