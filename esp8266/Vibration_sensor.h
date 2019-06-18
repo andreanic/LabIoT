@@ -11,23 +11,23 @@ class Vibration_sensor: public Sensor {
 
 Vibration_sensor::Vibration_sensor(int pin,float soglia): Sensor(pin,soglia) {
   this->setMaxSoglie(40);
-  this->sensorId="KY‐002";
+  this->sensorId="KY002";
   this->sensorName="vsensore ibrazione";
   this->description="sensore che rileva le vibrazioni";
   this->uom="";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-002_Vibration_switch_module";
 }
 Vibration_sensor::Vibration_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
   this->setMaxSoglie(40);
-  this->sensorId="KY‐002";
+  this->sensorId="KY002";
   this->sensorName="sensore vibrazione";
   this->description="sensore che rileva le vibrazioni";
   this->uom="";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-002_Vibration_switch_module";
 }
 
 Vibration_sensor::~Vibration_sensor(){}

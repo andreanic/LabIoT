@@ -17,7 +17,7 @@ Tilt_sensor::Tilt_sensor(int pin,float soglia): Sensor(pin,soglia) {
   this->uom="";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-020_Tilt_switch_module";
 }
 Tilt_sensor::Tilt_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
   this->setMaxSoglie(40);
@@ -27,7 +27,7 @@ Tilt_sensor::Tilt_sensor(int pin,float soglia,unsigned long frequenzacampionamen
   this->uom="";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-020_Tilt_switch_module";
 }
 
 Tilt_sensor::~Tilt_sensor(){}

@@ -11,22 +11,22 @@ class Fuoco: public Sensor {
 };
 
 Fuoco::Fuoco(int pin,float soglia): Sensor(pin,soglia){
-  this->sensorId="KY‐026";
+  this->sensorId="KY026";
   this->sensorName="sensore antincendio";
   this->description="sensore per il rilevamento di un incendio";
   this->uom="";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-026_Flame_sensor_module";
 }
 Fuoco::Fuoco(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
-  this->sensorId="KY‐026";
+  this->sensorId="KY026";
   this->sensorName="sensore antincendio";
   this->description="sensore per il rilevamento di un incendio";
   this->uom="";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-026_Flame_sensor_module";
 }
 
 Fuoco::~Fuoco(){}

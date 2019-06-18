@@ -26,12 +26,12 @@ const int colorB = 255;
 int status = WL_IDLE_STATUS;
 WiFiClient client ;
 
-//String serverAddress="149.132.182.203";
+
 //String webServerAddress="149.132.182.203:8080";
-// CAMBIARE L'INDIRIZZO !!!!
-String webServerAddress="149.132.182.121";
+String webServerAddress="149.132.182.121:3000";
+//char serverAddress[] = "149.132.182.203";
 char serverAddress[] = "149.132.182.121";
-char mqttBroker[] = "149.132.182.121";
+char mqttBroker[] = "149.132.182.203";
 IPAddress ip(149, 132, 182, 46);
 int port = 3000;
 
@@ -42,9 +42,9 @@ long tempo = 0;
 long idArduino = 0;
 
 HttpClient httpClient = HttpClient(client, serverAddress, port);
-String request = "http://"+webServerAddress+"/device/subscribe";
+//String request = "http://"+webServerAddress+"/device/subscribe";
 String request = "http://"+webServerAddress+"/testPost";
-String datiPath="";
+String datiPath="http://"+webServerAddress+"sensors/values/create";
 //////////////Wifi
 WiFiService* wifiService = new WiFiService();
 WiFiClient wificlient;
@@ -98,7 +98,7 @@ void loop() {
 
 
   long secondo = millis();
-  if(secondo-tempo>=10000){
+  if(secondo-tempo>=30000){
     Serial.println("sono vivo!");
     String allObjJson;
     createJsonObj(allObjJson,boardId);
@@ -109,7 +109,8 @@ void loop() {
     }
     tempo = secondo;
   }
-  
+
+  delay(30000);
 }
 
 void messageReceived(String &topic, String &payload) {
@@ -153,14 +154,14 @@ void campionaDati(){
         nota = 'C';
         float fuocoValue =fuoco->campiona();  
         //Serial.println("Inserisco Fuoco");
-        postRequest(fuoco->getJson(),request,payloadDati);
+        postRequest(fuoco->getJson(),datiPath,payloadDati);
         fuoco->setUltimoCampionamento(current);
     }
     if(suono->canSense(current)){
         nota = 'c';
         float suonoValue = suono->campiona();
         //Serial.println("Inserisco Suono -> " + String(suonoValue));
-        postRequest(suono->getJson(),request,payloadDati);
+        postRequest(suono->getJson(),datiPath,payloadDati);
         suono->setUltimoCampionamento(current);
     }
     if(luce->canSense(current)){
@@ -174,21 +175,21 @@ void campionaDati(){
         nota = 'e';
         float tempValue=temperatura->campiona();
         //Serial.println("Inserisco Temp");
-        //postRequest(temperatura->getJson(),datiPath);
+        postRequest(temperatura->getJson(),datiPath,payloadDati);
         temperatura->setUltimoCampionamento(current);
     }
     if(umidita->canSense(current)){
         nota = 'f';
         float umidValue=umidita->campiona();
         //Serial.println("Inserisco Umidita");
-        //postRequest(umidita->getJson(),datiPath);
+        postRequest(umidita->getJson(),datiPath,payloadDati);
         umidita->setUltimoCampionamento(current);
     }
     if(wifi->canSense(current)){
         nota = 'a';
         float wifiValue= wifi->campiona();
         //Serial.println("Inserisco Wifi");
-        //postRequest(wifi->getJson(),datiPath);
+        postRequest(wifi->getJson(),datiPath,payloadDati);
         wifi->setUltimoCampionamento(current);
     }
 }
@@ -244,7 +245,7 @@ int postRequest(String data,String path,String &response){
   } else if(statusCode == 404){
     Serial.println("Non Trovato, Errore 404");
   } else if(statusCode == 500){
-   /* String response = httpClient.responseBody();
+    /* String response = httpClient.responseBody();
     StaticJsonDocument<200> obj;
     deserializeJson(obj, response);
     serializeJson(obj["payload"], Serial);
@@ -271,19 +272,22 @@ void getDeviceId(const String &payload ){
 
 
 void createJsonObj(String &allObjJson,unsigned int board) {
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<2048> doc;
   JsonObject root = doc.to<JsonObject>();
   JsonObject device = root.createNestedObject("device");
   device["deviceName"]="MKR1000";
   if(board != 0){
-    device["deviceId"]=board;  
+    device["deviceId"]=board;
+    Serial.println(board);
   }
-  JsonArray sensors = root.createNestedArray("sensors");
-  luce->getJsonMetadata(sensors.createNestedObject());
-  umidita->getJsonMetadata(sensors.createNestedObject());
-  temperatura->getJsonMetadata(sensors.createNestedObject());
-  suono->getJsonMetadata(sensors.createNestedObject());
-  wifi->getJsonMetadata(sensors.createNestedObject());
-  fuoco->getJsonMetadata(sensors.createNestedObject());
+  else{
+    JsonArray sensors = root.createNestedArray("sensors");
+    luce->getJsonMetadata(sensors.createNestedObject());
+    umidita->getJsonMetadata(sensors.createNestedObject());
+    temperatura->getJsonMetadata(sensors.createNestedObject());
+    suono->getJsonMetadata(sensors.createNestedObject());
+    wifi->getJsonMetadata(sensors.createNestedObject());
+    fuoco->getJsonMetadata(sensors.createNestedObject());
+  }
   serializeJson(root, allObjJson);
 }

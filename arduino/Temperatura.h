@@ -17,23 +17,23 @@ class Temperatura: public Sensor {
 
 Temperatura::Temperatura(dht11 dht,int pin,float soglia): Sensor(pin,soglia){
 	this->dht = dht;
-  this->sensorId = "KY‐015T";
+  this->sensorId = "KY015T";
   this->sensorName = "sensore temperatura";
-  this->description="sensore per misurare la temperatura dell'ambiente";
+  this->description="sensore per misurare la temperatura dell\'ambiente";
   this->uom="gradi centigradi";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-015_Temperature_and_humidity_sensor_module";
 }
 Temperatura::Temperatura(dht11 dht,int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento){
   this->dht = dht;
-  this->sensorId = "KY‐015T";
+  this->sensorId = "KY015T";
   this->sensorName = "sensore temperatura";
-  this->description="sensore per misurare la temperatura dell'ambiente";
+  this->description="sensore per misurare la temperatura dell\'ambiente";
   this->uom="gradi centigradi";
   this->typeValue="Float";
   this->isDigital=true;
-  this->url="";
+  this->url="https://tkkrlab.nl/wiki/Arduino_KY-015_Temperature_and_humidity_sensor_module";
 }
 Temperatura::~Temperatura(){}
 
