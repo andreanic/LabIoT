@@ -25,18 +25,10 @@ IPAddress gateway(149, 132, 182, 1);
 const char *mqttserver ="149.132.182.203";
 ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);
  
-//CASA
-/*String SECRET_SSID = "TP-LINK_4EDD0A";         
-String SECRET_PASS = "215c575007228"; 
-IPAddress ip(192,168,1,108);
-IPAddress subnet(255, 255, 255, 0);
-IPAddress gateway(192,168,1,1);
-const char *mqttserver ="192.168.1.102";
-ESP8266WiFiService ESP8266Wifi(ip,dns,gateway,subnet,SECRET_SSID,SECRET_PASS);*/
+
 unsigned long aliveFrequency = 30000;
 unsigned long lastAliveSignal;
 String webServerAddress="149.132.182.203:8080";
-//String webServerAddress="149.132.182.121:3000";
 MQTTInterface *mqtt = new ESP8266MQTT(mqttserver,1883);
 Tilt_sensor *tilt = new Tilt_sensor(D2,1,50);
 Heartbeat_sensor *heartbeat= new Heartbeat_sensor(A0,144,3000);
@@ -44,7 +36,6 @@ Vibration_sensor *vibration = new Vibration_sensor(D0,1,50);
 float oldvalue_vibrazione = -1;
 float oldvalue_heart = -1;
 float oldvalue_tilt = -1;
-//connetere un led e un button ky-004
 Led_actuator *led = new Led_actuator(D1);
 Led_actuator *ledHelp = new Led_actuator(D8);
 Button_simple *button = new Button_simple(D3);
@@ -65,7 +56,6 @@ void setup() {
   unsigned long current = millis();
   String allObjJson; 
   createJsonObj(allObjJson,boardId);
-  //String request = "http://"+webServerAddress+"/testPost";
   String request = "http://"+webServerAddress+"/device/subscribe";
   int httpCode;
   String payload;
@@ -97,7 +87,6 @@ void loop() {
       Serial.println("Rcihiesta subscribe loop");
       String allObjJson; 
       createJsonObj(allObjJson,boardId);
-      //String request = "http://"+webServerAddress+"/testPost";
       String request = "http://"+webServerAddress+"/device/subscribe";
       int httpCode;
       String payload;
@@ -153,8 +142,6 @@ void loop() {
               oldvalue_vibrazione = valorevibrazione;
           }  
         }
-        //Serial.print("Vibrazione: ");
-        //Serial.println(valorevibrazione);
       }
       //Heartbeat
       if(heartbeat->canSense(current)){
@@ -209,26 +196,12 @@ void loop() {
               oldvalue_tilt = valoretilt;
             }  
           }
-          //Serial.print("Tilt: ");
-            //Serial.println(valoretilt);
       }
      }
     }
   delay(2000);
 }
-/*
-{
- "device":{
-  "deviceName":"arduino MKR 1000",
-  "deviceId": 100000
- },
- "sensors":[{
-  "sensorId":"KSI - 85",
-  "sensorName":"Temperatura",
-  "descritpion":"Sensore per misurare la temperatura"
- }]
-}
-*/
+
 void createJsonObj(String &allObjJson,unsigned int board) {
   StaticJsonDocument<2048> doc;
   JsonObject root = doc.to<JsonObject>();

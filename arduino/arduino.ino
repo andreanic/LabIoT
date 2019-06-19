@@ -26,16 +26,10 @@ const int colorB = 255;
 int status = WL_IDLE_STATUS;
 WiFiClient client ;
 
-///Andrea
 String webServerAddress="149.132.182.203:8080";
 char serverAddress[] = "149.132.182.203";
 char mqttBroker[] = "149.132.182.203";
 int port = 8080;
-//Marco
-/*String webServerAddress="149.132.182.121:3000";
-char serverAddress[] = "149.132.182.121";
-char mqttBroker[] = "149.132.182.121";
-int port = 3000;*/
 //////////////////////
 IPAddress ip(149, 132, 182, 57);
 
@@ -48,7 +42,6 @@ long idArduino = 0;
 
 HttpClient httpClient = HttpClient(client, serverAddress, port);
 String subscribePath = "/device/subscribe";
-//String request = "http://"+webServerAddress+"/testPost";
 String datiPath="/sensor/values/create";
 //////////////Wifi
 WiFiService* wifiService = new WiFiService();
