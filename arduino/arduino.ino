@@ -37,7 +37,7 @@ char serverAddress[] = "149.132.182.121";
 char mqttBroker[] = "149.132.182.121";
 int port = 3000;*/
 //////////////////////
-IPAddress ip(149, 132, 182, 46);
+IPAddress ip(149, 132, 182, 57);
 
 
 String allObjJson;
@@ -70,7 +70,7 @@ bool doSense = true;
 char nota='c';
 
 void setup() {
-  Serial.begin(115200);
+  //Serial.begin(115200);
   pinMode(pinBuzzer, OUTPUT);
   mqttClient.begin(mqttBroker, net);
   mqttClient.onMessage(messageReceived);

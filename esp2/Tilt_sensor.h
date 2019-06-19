@@ -10,7 +10,7 @@ class Tilt_sensor: public Sensor {
 };
 
 Tilt_sensor::Tilt_sensor(int pin,float soglia): Sensor(pin,soglia) {
-  this->setMaxSoglie(40); 
+  this->setMaxSoglie(3); 
   this->sensorId="KY020";
   this->sensorName="sensore tilt";
   this->description="sensore tilt";
@@ -20,7 +20,7 @@ Tilt_sensor::Tilt_sensor(int pin,float soglia): Sensor(pin,soglia) {
   this->url="https://tkkrlab.nl/wiki/Arduino_KY-020_Tilt_switch_module";
 }
 Tilt_sensor::Tilt_sensor(int pin,float soglia,unsigned long frequenzacampionamento): Sensor(pin,soglia,frequenzacampionamento) {
-  this->setMaxSoglie(40);
+  this->setMaxSoglie(3);
   this->sensorId="KY020";
   this->sensorName="sensore tilt";
   this->description="sensore tilt";

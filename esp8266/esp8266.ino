@@ -115,13 +115,15 @@ void loop() {
   
      if(buttonHelp->isPressed()){
         ledHelp->activate(HIGH); 
-        mqtt->publish("aiuto", "Help aiutami");
+        mqtt->publish(String("aiuto").c_str(), String("Help aiutami").c_str());
         Serial.println("Richiesta di aiuto inviata");
      }
   
     //SENSORI
     long current = millis();
      if(boardId != 0) {
+      String alertString="alert";
+      const char* al = alertString.c_str();
       Serial.println("Board " + String(boardId));
      if(vibration->canSense(current)){
         float valorevibrazione = vibration->campiona();
@@ -136,7 +138,7 @@ void loop() {
           doc["isAlert"] = true;
           serializeJson(doc,svib);
           Serial.println("alert vibrazione");
-          mqtt->publish("alert", svib.c_str());
+          mqtt->publish(al, svib.c_str(),true);
         }
         else { 
           //altrimenti solo se il valore è diverso da quello precedente invia tramite mqtt
@@ -164,7 +166,7 @@ void loop() {
             doc["isAlert"] = true;
             serializeJson(doc,scuore);
             Serial.println("Alert cuore");
-            mqtt->publish("alert", scuore.c_str());
+            mqtt->publish(al, scuore.c_str(),true);
           }
           else {
             //solo se il valore è diverso da quello precedente invia tramite mqtt
@@ -192,7 +194,8 @@ void loop() {
             doc["isAlert"] = true;
             serializeJson(doc,stilt);
             Serial.println("Alert tilt");
-            mqtt->publish("alert", stilt.c_str());
+            
+            mqtt->publish(al, stilt.c_str(),true);
           }
           else {
             if(oldvalue_tilt != valoretilt){
@@ -228,7 +231,7 @@ void createJsonObj(String &allObjJson,unsigned int board) {
   JsonObject root = doc.to<JsonObject>();
   JsonObject device = root.createNestedObject("device");
   device["deviceName"]="ESP8266";
-  device["description"]="Dispositivo esp per monitoraggio paziente";
+  device["description"]="Dispositivo esp per monitoraggio paziente della stanza 101";
   if(board != 0){
     device["deviceId"]=board;  
   }

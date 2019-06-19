@@ -17,7 +17,7 @@ class ESP8266MQTT : public MQTTInterface {
     bool isConnected() override;
     bool connect() override;
     void reconnect() override;
-    void publish(const char* topic, const char *msg) override;
+    void publish(const char* topic, const char *msg,bool retained) override;
     void subscribe(const char* topic,int qos) override;
     void setCallback(void (*fp)(char*, byte*,unsigned int)) override;
     void loop();
@@ -34,8 +34,8 @@ bool ESP8266MQTT::isConnected() {
 bool ESP8266MQTT::connect(){
   return this->client.connect(this->server);  
 }
-void ESP8266MQTT::publish(const char* topic, const char *msg){
-  this->client.publish(topic,msg);
+void ESP8266MQTT::publish(const char* topic, const char *msg,bool retained = false){
+  this->client.publish(topic,msg,retained);
 }
 void ESP8266MQTT::subscribe(const char* topic,int qos=0) {
   this->client.subscribe(topic,qos);
