@@ -267,6 +267,7 @@ void createJsonObj(String &allObjJson,unsigned int board) {
   JsonObject root = doc.to<JsonObject>();
   JsonObject device = root.createNestedObject("device");
   device["deviceName"]="MKR1000";
+  device["description"]="Dispositivo per home monitoring";
   if(board != 0){
     device["deviceId"]=board;
     Serial.println(board);

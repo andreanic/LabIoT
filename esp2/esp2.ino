@@ -4,7 +4,6 @@
 #include <ArduinoJson.h>
 #include "Tilt_sensor.h"
 #include "Vibration_sensor.h"
-#include "Hearbeat_sensor.h"
 #include "Led_actuator.h"
 #include "Button_simple.h"
 #include <Arduino.h>
@@ -39,7 +38,6 @@ String webServerAddress="149.132.182.203:8080";
 //String webServerAddress="149.132.182.121:3000";
 MQTTInterface *mqtt = new ESP8266MQTT(mqttserver,1883);
 Tilt_sensor *tilt = new Tilt_sensor(D2,1,50);
-Heartbeat_sensor *heartbeat= new Heartbeat_sensor(A0,144,3000);
 Vibration_sensor *vibration = new Vibration_sensor(D0,1,50);
 float oldvalue_vibrazione = -1;
 float oldvalue_heart = -1;
@@ -151,33 +149,6 @@ void loop() {
         //Serial.print("Vibrazione: ");
         //Serial.println(valorevibrazione);
       }
-      //Heartbeat
-      if(heartbeat->canSense(current)){
-         float valoreheart = heartbeat->campiona();
-         String scuore;
-         StaticJsonDocument<300> doc;
-         doc["deviceId"]=boardId;
-         doc["sensorId"] = heartbeat->sensorId;
-         doc["value"] = valoreheart;
-         heartbeat->setUltimoCampionamento(current);
-          if(heartbeat->isAlert()){
-            doc["isAlert"] = true;
-            serializeJson(doc,scuore);
-            Serial.println("Alert cuore");
-            mqtt->publish("alert", scuore.c_str());
-          }
-          else {
-            //solo se il valore è diverso da quello precedente invia tramite mqtt
-            if(oldvalue_heart != valoreheart){
-                doc["isAlert"] = false;
-                serializeJson(doc,scuore);
-                Serial.println("dati cuore");
-                mqtt->publish("dati", scuore.c_str());
-                oldvalue_heart = valoreheart;
-            }  
-          }
-         //Serial.println(valoreheart);
-      }
       //Tilt
       if(tilt->canSense(current)){
           float valoretilt = tilt->campiona();
@@ -228,13 +199,12 @@ void createJsonObj(String &allObjJson,unsigned int board) {
   JsonObject root = doc.to<JsonObject>();
   JsonObject device = root.createNestedObject("device");
   device["deviceName"]="ESP8266";
-  device["description"]="Dispositivo esp per monitoraggio paziente";
+  device["description"]="Dispositivo esp monitoraggio di un cane";
   if(board != 0){
     device["deviceId"]=board;  
   }
   else {
     JsonArray sensors = root.createNestedArray("sensors");
-    heartbeat->getJsonMetadata(sensors.createNestedObject());
     tilt->getJsonMetadata(sensors.createNestedObject());
     vibration->getJsonMetadata(sensors.createNestedObject());
   }
