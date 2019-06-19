@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +17,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 /**
  *
@@ -24,7 +28,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 @EnableWebSecurity
 @EnableWebMvc
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSocketMessageBroker
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements WebSocketMessageBrokerConfigurer {
 
       @Override
       protected void configure(HttpSecurity http) throws Exception {
@@ -50,6 +55,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         
         source.registerCorsConfiguration("/**", configuration);
         return source;
+      }
+      
+      @Override
+      public void configureMessageBroker(MessageBrokerRegistry config) {
+          config.enableSimpleBroker("/webclient");
+      }
+
+      @Override
+      public void registerStompEndpoints(StompEndpointRegistry registry) {
+          registry.addEndpoint("/register")
+		          .setAllowedOrigins("*")
+		          .withSockJS();
       }
 }
 

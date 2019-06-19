@@ -9,14 +9,27 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
+import org.springframework.web.socket.sockjs.client.SockJsClient;
+import org.springframework.web.socket.sockjs.client.Transport;
+import org.springframework.web.socket.sockjs.client.WebSocketTransport;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.lab.iot.device.exception.NoDeviceFoundException;
+import it.lab.iot.device.exception.WebSocketException;
 import it.lab.iot.device.repository.IDeviceRepository;
 import it.lab.iot.dto.SensorDTO;
 import it.lab.iot.dto.SensorDevicesDTO;
 import it.lab.iot.dto.SensorValueDTO;
 import it.lab.iot.exception.BaseException;
+import it.lab.iot.security.WebSocketSessionHandler;
 import it.lab.iot.sensor.entity.Device;
 import it.lab.iot.sensor.entity.Sensor;
 import it.lab.iot.sensor.entity.SensorValues;
@@ -26,9 +39,11 @@ import it.lab.iot.sensor.exception.NoSensorFoundException;
 import it.lab.iot.sensor.exception.NoValuesFoundException;
 import it.lab.iot.sensor.mapper.SensorToDTO;
 import it.lab.iot.sensor.mapper.SensorToSensorDevicesDTO;
+import it.lab.iot.sensor.mapper.SensorValueDTOToSensorValue;
 import it.lab.iot.sensor.mapper.SensorValueToDTO;
 import it.lab.iot.sensor.repository.ISensorRepository;
 import it.lab.iot.sensor.repository.ISensorValuesRepository;
+import it.lab.iot.websocket.service.IWebSocketService;
 
 @Service
 public class SensorService implements ISensorService  {
@@ -41,6 +56,8 @@ public class SensorService implements ISensorService  {
 	private ISensorRepository sensorRepository;
 	@Autowired
 	private IDeviceRepository deviceRepository;
+	@Autowired
+	private IWebSocketService webSocketService;
 	
 	@Override
 	public List<SensorValueDTO> getValues() throws BaseException {
@@ -90,24 +107,32 @@ public class SensorService implements ISensorService  {
 	}
 	
 	@Override
-	public void createValue(SensorValueDTO sensorValue) throws BaseException {
-		if(sensorValue == null || sensorValue.getSensorId() == null || sensorValue.getSensorId().isEmpty()) throw new InvalidSensorRecordException();
+	public SensorValueDTO createValue(SensorValueDTO dto) throws BaseException {
+		if(dto == null || dto.getSensorId() == null || dto.getSensorId().isEmpty() || dto.getDeviceId() == null) throw new InvalidSensorRecordException();
 		
-		Optional<Sensor> sensor = sensorRepository.findById(sensorValue.getSensorId());
+		Optional<Sensor> sensor = sensorRepository.findById(dto.getSensorId());
 		
-		if(!sensor.isPresent()) throw new NoSensorFoundException(sensorValue.getSensorId());
+		if(!sensor.isPresent()) throw new NoSensorFoundException(dto.getSensorId());
 		
-		Optional<Device> device = deviceRepository.findById(sensorValue.getDeviceId());
+		Optional<Device> device = deviceRepository.findById(dto.getDeviceId());
 		
-		if(!device.isPresent()) throw new NoDeviceFoundException(sensorValue.getDeviceId());
+		if(!device.isPresent()) throw new NoDeviceFoundException(dto.getDeviceId());
 		
-		SensorValues sensorValueToAdd = new SensorValues();
-		sensorValueToAdd.setSensor(sensor.get());
-		sensorValueToAdd.setSubscriber(device.get());
-		sensorValueToAdd.setValore(sensorValue.getValue());
-		sensorValueToAdd.setIsAlert(sensorValue.getIsAlert() != null ? sensorValue.getIsAlert() : false);
+		SensorValues sensorValue = SensorValueDTOToSensorValue.map(dto);
+		sensorValue.setSensor(sensor.get());
+		sensorValue.setSubscriber(device.get());
 		
-		this.sensorValuesRepository.save(sensorValueToAdd);		
+		sensorValue = this.sensorValuesRepository.save(sensorValue);	
+		
+		dto = SensorValueToDTO.map(sensorValue);
+		
+		try{
+			webSocketService.sendMessage(dto);
+		}catch(BaseException e) {
+			logger.warn(e.getHrMessage());
+		}
+		
+		return dto;
 	}
 	
 	@Override

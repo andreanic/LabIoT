@@ -13,7 +13,10 @@ public class DeviceDTOToDevice {
 		
 		device.setId(dto.getDeviceId());
 		device.setDeviceName(dto.getDeviceName());
-		device.setLastUpdate(new Timestamp(new Date().getTime()));
+		device.setDescription(dto.getDescription());
+		device.setEnabled(Boolean.TRUE);
+		device.setRegistered(new Date());
+		device.setLastUpdate(new Date());
 		
 		return device;
 	}

@@ -7,6 +7,7 @@ import { DeviceRepositoryService } from '../../repository/device-repository/devi
 import { DeviceSensorsDTO } from '../../model/DeviceSensorsDTO';
 import { SensorDevicesDTO } from '../../model/SensorDevicesDTO';
 import { ToastrService } from 'ngx-toastr';
+import { WebSocketService } from '../../service/websocket-service/web-socket.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +17,6 @@ import { ToastrService } from 'ngx-toastr';
 export class DashboardComponent implements OnInit, OnDestroy {
 
   //DTO response
-  private sensorValues: SensorValue[] = [];
   private specificSensorValues: SensorValue[] = [];
   private devices: DeviceDTO[] = [];
   private sensors: SensorDTO[] = [];
@@ -24,8 +24,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private sensorDevices: SensorDevicesDTO;
  
   private refreshValuesID: NodeJS.Timer;
-  private isStopped: boolean = false;
-  private tableTitle: string = null;
   private SENSOR_REFRESH_TIMER: number = 1000;
   
   private selectedCategory: string;
@@ -45,48 +43,49 @@ export class DashboardComponent implements OnInit, OnDestroy {
   //Toast message
   private errorMessage: string;
   private successMessage: string;
-  private showTime: number = 20000;
+  private showTime: number = 2000;
 
   constructor(private sensorRepository: SensorRepository,
               private deviceRepository: DeviceRepositoryService,
-              private toasterService: ToastrService) { }
+              private websocketService: WebSocketService) { }
 
   ngOnInit() {
-    //this.startMonitoring();
   }
 
   ngOnDestroy(){
+    this.websocketService.disconnect();
   }
 
   public getAllDevices(): void{
-    this.deviceRepository.getAllDevicesAvailable().subscribe(devices => {
-      this.devices = devices;
+    this.deviceRepository.getAllDevicesAvailable().subscribe(devices => {      
       this.changeCategory(this.DEVICES);
+      this.devices = devices;
     },
     err => {
-      console.error(err);
+      this.showErrorMessage(err);
     }) 
     
   }
 
   public getAllSensors(): void{
     this.sensorRepository.getAllSensorsAvailable().subscribe(sensors => {      
-      this.sensors = sensors;
       this.changeCategory(this.SENSORS);
+      this.sensors = sensors;
     },
     err => {      
-      console.error(err);
+      this.showErrorMessage(err);
     });
     
   }
 
   public getLastValues(): void{
     this.sensorRepository.getLastValues().subscribe(values => {
-      this.sensorValues = values;
       this.changeCategory(this.VALUES);
+      this.websocketService.sensorValues = values;
+      this.websocketService.connect();
     },
     err => {
-      console.error(err);
+      this.showErrorMessage(err);
     });
   }
 
@@ -108,30 +107,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.selectedSubCategory = this.DEVICESXSENSOR;
     },
     err => {
-      console.error(err);
+      this.showErrorMessage(err);
     })
   }
 
-  public getLast20Values(sensorValue: SensorValue): void{
-    this.tableTitle = sensorValue.sensorName
-    this.sensorRepository.getLast20ValuesBySensorId(sensorValue.$sensorId).subscribe(records => {
-      this.specificSensorValues = records;
+  public getLast20ValuesByDeviceAndSensorID(sensorId: string, deviceId: number): void{
+    this.websocketService.disconnect();
+    this.sensorRepository.getLast20ValuesBySensorIdAndDeviceId(sensorId, deviceId).subscribe(records => {
+      this.websocketService.sensorValues = records;
+      this.websocketService.connect(sensorId, deviceId);
     },
     err => {
-      console.warn("Error -> " + err);
-    });
-  }
-
-  public getLast20ValuesByDeviceAndSensorID(sensorId: string, deviceId: number): void{
-    this.sensorRepository.getLast20ValuesBySensorIdAndDeviceId(sensorId, deviceId).subscribe(records => {
-      this.specificSensorValues = records;
+      this.showErrorMessage(err);
     });
   }
 
   private changeCategory(category: string): void{
+    this.sensors = null;
+    this.devices = null;
+    this.websocketService.sensorValues = null;
     this.selectedCategory = category;
     this.specificSensorValues = null;
+    this.websocketService.disconnect();
     this.changeSubcategory(null);
+    clearInterval(this.refreshValuesID);
   }
 
   private changeSubcategory(subcategory: string): void{
@@ -152,10 +151,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.successMessage = null;
     }, this.showTime);
-  }
-
-  private goToUrl(url: string): void{
-    window.location.href = url;
   }
 
   private startMonitoring(device: DeviceDTO): void{
