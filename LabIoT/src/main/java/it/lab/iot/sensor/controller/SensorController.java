@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +29,7 @@ import it.lab.iot.dto.SensorValueDTO;
 import it.lab.iot.exception.AppException;
 import it.lab.iot.exception.BaseException;
 import it.lab.iot.exception.ExceptionHandlerController;
+import it.lab.iot.sensor.entity.SensorValues;
 import it.lab.iot.sensor.service.ISensorService;
 
 
@@ -128,8 +131,8 @@ public class SensorController extends ExceptionHandlerController{
 	public ResponseEntity<ApiBaseResponse> createValue(HttpServletRequest request,@RequestBody SensorValueDTO sensorValue) throws AppException {
 		try {
 			logger.info(request.getRequestURI());
-			sensorService.createValue(sensorValue);
-			ApiBaseResponse abp = new ApiBaseResponse(request.getRequestURI(),null);
+			SensorValueDTO response = sensorService.createValue(sensorValue);
+			ApiBaseResponse<SensorValueDTO> abp = new ApiBaseResponse<SensorValueDTO>(request.getRequestURI(),response);
 	        return new ResponseEntity<ApiBaseResponse>(abp,HttpStatus.OK);
 		} catch (BaseException e) {
 			throw new AppException(e);
@@ -152,4 +155,9 @@ public class SensorController extends ExceptionHandlerController{
 		}
 	}
 	
+    @MessageMapping("/data")
+    @SendTo("/webclient")
+    public SensorValueDTO greeting(SensorValueDTO message) {
+        return message;
+    }
 }

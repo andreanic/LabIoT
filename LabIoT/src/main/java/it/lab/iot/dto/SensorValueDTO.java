@@ -14,6 +14,6 @@ public class SensorValueDTO {
 	private String sensorName;
 	private Float value;
 	private Boolean isAlert;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Europe/Rome")
 	private Date dataInserimento;
 }

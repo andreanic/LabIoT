@@ -2,19 +2,35 @@ package it.lab.iot.device.service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaders;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandler;
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.lab.iot.device.exception.InvalidDeviceIdException;
 import it.lab.iot.device.exception.InvalidStartStopTypeException;
 import it.lab.iot.device.exception.NoDeviceFoundException;
 import it.lab.iot.device.exception.SubscribeInputEmptyException;
+import it.lab.iot.device.exception.WebSocketException;
 import it.lab.iot.device.mapper.DeviceDTOToDevice;
 import it.lab.iot.device.mapper.DeviceToDTO;
 import it.lab.iot.device.mapper.DeviceToDeviceSensorsDTO;
@@ -23,8 +39,10 @@ import it.lab.iot.device.repository.IDeviceSensorRepository;
 import it.lab.iot.dto.DeviceDTO;
 import it.lab.iot.dto.DeviceSensorsDTO;
 import it.lab.iot.dto.SensorDTO;
+import it.lab.iot.dto.SensorValueDTO;
 import it.lab.iot.exception.BaseException;
 import it.lab.iot.mqtt.service.IMqttService;
+import it.lab.iot.security.WebSocketSessionHandler;
 import it.lab.iot.sensor.entity.Device;
 import it.lab.iot.sensor.entity.DeviceSensor;
 import it.lab.iot.sensor.entity.Sensor;
@@ -53,8 +71,11 @@ public class DeviceService implements IDeviceService {
 	private IMqttService mqttService;
 	
 	@Override
-	public List<DeviceDTO> getAllDeviceAvailable() throws BaseException {		
-		List<Device> devices = (List<Device>) deviceRepository.findAll();
+	public List<DeviceDTO> getAllDeviceAvailable() throws BaseException {	
+		Calendar cal = Calendar.getInstance();
+	    cal.add(Calendar.MINUTE, -2);
+	    Date oneMinAgo =  cal.getTime();
+		List<Device> devices = (List<Device>) deviceRepository.findAllByLastUpdateGreaterThanEqual(oneMinAgo);
 		
 		if(devices == null || devices.isEmpty()) throw new NoDeviceFoundException();
 		
@@ -83,9 +104,9 @@ public class DeviceService implements IDeviceService {
 			throw new SubscribeInputEmptyException();
 		
 		Integer deviceId = null;
-		
-		//Aggiungo un nuovo device solamente se il device id è nullo o uguale a -1 (cioè non inizializzato)
-		if(deviceDTO.getDevice().getDeviceId() == null || new Integer(-1).equals(deviceDTO.getDevice().getDeviceId())) {
+		logger.info(deviceDTO.getDevice().getDescription());
+		//Aggiungo un nuovo device solamente se il device id è nullo o uguale a 0 (cioè non inizializzato)
+		if(deviceDTO.getDevice().getDeviceId() == null || new Integer(0).equals(deviceDTO.getDevice().getDeviceId())) {
 			deviceId = this.addNewDevice(deviceDTO);
 		}
 		//Altrimenti refresho il device rendendolo visibile per altri N minuti
@@ -94,7 +115,9 @@ public class DeviceService implements IDeviceService {
 			
 			if(device.isPresent()) {
 				//Salvo direttamente poichè al salvataggio si aggiorna la data con il current time
-				deviceRepository.save(device.get());
+				Device deviceToUpdate = device.get();
+				deviceToUpdate.setLastUpdate(new Date());
+				deviceRepository.save(deviceToUpdate);
 				deviceId = device.get().getId();
 			}
 			else {
@@ -187,5 +210,7 @@ public class DeviceService implements IDeviceService {
 			throw new InvalidStartStopTypeException();
 		}		
 	}
+	
+
 
 }

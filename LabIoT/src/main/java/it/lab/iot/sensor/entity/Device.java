@@ -2,7 +2,7 @@ package it.lab.iot.sensor.entity;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 
@@ -25,9 +25,9 @@ public class Device implements Serializable {
 	private String deviceName;
 
 	@Column(name="last_update")
-	private Timestamp lastUpdate;
+	private Date lastUpdate;
 	
-	private Timestamp registered;
+	private Date registered;
 	
 	private String description;
 	
@@ -60,11 +60,11 @@ public class Device implements Serializable {
 		this.deviceName = deviceName;
 	}
 
-	public Timestamp getLastUpdate() {
+	public Date getLastUpdate() {
 		return this.lastUpdate;
 	}
 
-	public void setLastUpdate(Timestamp lastUpdate) {
+	public void setLastUpdate(Date lastUpdate) {
 		this.lastUpdate = lastUpdate;
 	}
 
@@ -112,11 +112,11 @@ public class Device implements Serializable {
 		return sensorValue;
 	}
 
-	public Timestamp getRegistered() {
+	public Date getRegistered() {
 		return registered;
 	}
 
-	public void setRegistered(Timestamp registered) {
+	public void setRegistered(Date registered) {
 		this.registered = registered;
 	}
 

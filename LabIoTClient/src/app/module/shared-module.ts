@@ -5,6 +5,7 @@ import { HttpModule } from '@angular/http';
 import { SensorRepository } from '../repository/sensor-repository/sensor-repository.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { DeviceRepositoryService } from '../repository/device-repository/device-repository.service';
+import { WebSocketService } from '../service/websocket-service/web-socket.service';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { DeviceRepositoryService } from '../repository/device-repository/device-
   ],
   providers: [
     SensorRepository,
-    DeviceRepositoryService
+    DeviceRepositoryService,
+    WebSocketService
   ],
   exports: [
     FormsModule,
