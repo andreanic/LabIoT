@@ -93,7 +93,9 @@ void loop() {
       Serial.println("tempo richiesta " + String(millis()));
       httpPost(request,allObjJson,httpCode, payload);
       if(httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY){
-        boardId = getDeviceIdFromHttp(payload);  
+        if(boardId == 0){          
+          boardId = getDeviceIdFromHttp(payload);  
+        }  
       }
       lastAliveSignal = currentAlive;
       Serial.println("Id board:" + String(boardId));
